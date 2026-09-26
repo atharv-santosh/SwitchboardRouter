@@ -14,6 +14,11 @@ DEFAULT_LOCATION = "global"
 RETRYABLE = ("429", "500", "502", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE", "INTERNAL", "DEADLINE")
 
 
+def _tool(types: Any, declarations: list[dict[str, Any]]) -> Any:
+    """Wrap raw function declarations; the SDK accepts dicts but its stubs insist on models."""
+    return types.Tool(function_declarations=declarations)
+
+
 def _client(project: str | None = None, location: str | None = None) -> Any:
     try:
         from google import genai
@@ -63,7 +68,7 @@ class VertexModel:
         config = types.GenerateContentConfig(
             temperature=self.temperature,
             max_output_tokens=request.max_output_tokens,
-            tools=[types.Tool(function_declarations=request.tools)] if request.tools else None,
+            tools=[_tool(types, request.tools)] if request.tools else None,
             tool_config=types.ToolConfig(
                 function_calling_config=types.FunctionCallingConfig(mode=types.FunctionCallingConfigMode.ANY)
             )
@@ -160,7 +165,7 @@ class VertexCacheBackend:
             model=model,
             config=types.CreateCachedContentConfig(
                 contents=[{"role": "user", "parts": [{"text": prefix}]}],
-                tools=[types.Tool(function_declarations=tools)] if tools else None,
+                tools=[_tool(types, tools)] if tools else None,
                 ttl=f"{int(ttl_seconds)}s",
             ),
         )

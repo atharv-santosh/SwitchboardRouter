@@ -208,9 +208,15 @@ def default_configs(
     dollars per solved task, not just beat the strongest one, and a routing result that
     omits the middle tier is hiding the comparison that matters.
     """
-    common = dict(tool_latency_ms=tool_latency_ms, max_steps=max_steps)
     configs = [
-        RunConfig(name=f"single_{t}", tiers=(t,), policy="none", **common) for t in ("cheap", "mid", "mid2", "strong")
+        RunConfig(
+            name=f"single_{t}",
+            tiers=(t,),
+            policy="none",
+            tool_latency_ms=tool_latency_ms,
+            max_steps=max_steps,
+        )
+        for t in ("cheap", "mid", "mid2", "strong")
     ]
     for policy in ("schema_validation", "self_confidence", "verifier_model", "learned_threshold", "oracle"):
         configs.append(
@@ -221,7 +227,8 @@ def default_configs(
                 confidence_threshold=confidence_threshold,
                 learned_threshold=learned_threshold,
                 learned_weights=learned_weights or {},
-                **common,
+                tool_latency_ms=tool_latency_ms,
+                max_steps=max_steps,
             )
         )
     return configs

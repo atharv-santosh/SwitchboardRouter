@@ -19,6 +19,13 @@ def _tool(types: Any, declarations: list[dict[str, Any]]) -> Any:
     return types.Tool(function_declarations=declarations)
 
 
+def _any_tool_config(types: Any) -> Any:
+    """Force a function call rather than prose, so a step always produces an action."""
+    return types.ToolConfig(
+        function_calling_config=types.FunctionCallingConfig(mode=types.FunctionCallingConfigMode.ANY)
+    )
+
+
 def _client(project: str | None = None, location: str | None = None) -> Any:
     try:
         from google import genai
@@ -65,15 +72,15 @@ class VertexModel:
         else:
             contents = [{"role": "user", "parts": [{"text": request.prompt()}]}]
 
+        # Vertex rejects a request that sets tools or tool_config alongside cached content:
+        # both belong to the cache object, which is created with them. So a cached call
+        # sends neither, and the forced-function-calling mode comes from the cache.
+        send_tools = bool(request.tools) and not cache_handle
         config = types.GenerateContentConfig(
             temperature=self.temperature,
             max_output_tokens=request.max_output_tokens,
-            tools=[_tool(types, request.tools)] if request.tools else None,
-            tool_config=types.ToolConfig(
-                function_calling_config=types.FunctionCallingConfig(mode=types.FunctionCallingConfigMode.ANY)
-            )
-            if request.tools
-            else None,
+            tools=[_tool(types, request.tools)] if send_tools else None,
+            tool_config=_any_tool_config(types) if send_tools else None,
             cached_content=cache_handle or None,
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )

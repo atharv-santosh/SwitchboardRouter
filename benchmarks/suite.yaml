@@ -1,0 +1,286 @@
+# Benchmark suite for cost-aware routing.
+#
+# The point of a cascade is to find the steps that do not need the strong model. A
+# suite the cheap model passes everywhere measures nothing, and neither does one it
+# fails everywhere: in the first case every escalation is waste, in the second every
+# acceptance is a loss, and either way the escalation policies are indistinguishable.
+# So the fourteen tasks below are deliberately built as a ladder.
+#
+# Tasks 1 to 4 are single-file edits with the target named or one grep away. The cheap
+# model should get these, and a policy that escalates them is burning money.
+#
+# Tasks 5 to 10 need one act of discrimination: pick the live file over the decoy, read
+# a limit before applying it, notice that the condition holds nowhere, or reconcile two
+# files. This is where the policies separate from each other.
+#
+# Tasks 11 to 14 need arithmetic over values read from several files, or an exact output
+# schema, or both. The cheap model fails most of these on the merits, not on formatting.
+#
+# `difficulty` drives the offline simulated model only; it has no effect on a real run.
+# The values were set once, then adjusted so the simulated cheap tier's per-task success
+# tracked what gemini-2.5-flash-lite actually did on the same tasks (see MEASUREMENTS.md).
+#
+# `gold_plan` is the reference solution. The simulated model returns the next gold action
+# when it succeeds and a corruption of it when it fails. Real runs never see it; grading
+# is on final workspace state for every backend.
+
+workspace:
+  policy/limits.yaml: |
+    max_total_memory_mi: 8192
+    max_replicas_per_service: 10
+    max_effective_footprint_mi: 20000
+  services/api.yaml: |
+    name: api
+    replicas: 2
+    memory_mi: 512
+    cpu_m: 250
+  services/web.yaml: |
+    name: web
+    replicas: 3
+    memory_mi: 1536
+    cpu_m: 500
+  services/worker.yaml: |
+    name: worker
+    replicas: 4
+    memory_mi: 1024
+    cpu_m: 750
+  services/cache.yaml: |
+    name: cache
+    replicas: 1
+    memory_mi: 2048
+    cpu_m: 250
+  examples/web.yaml: |
+    name: web
+    replicas: 99
+    memory_mi: 9999
+    cpu_m: 4000
+  runbook.md: |
+    Scale the web tier before a launch and scale it back afterwards. Memory changes
+    need a restart; replica changes do not. The values in examples/ are illustrative
+    and are not what runs in production.
+
+tasks:
+  - id: api_replicas
+    difficulty: 0.18
+    band: easy
+    prompt: "In services/api.yaml, set replicas to 5."
+    gold_plan:
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: set_value, args: {path: services/api.yaml, key: replicas, value: "5"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/api.yaml, key: replicas, equals: 5}
+
+  - id: web_cpu
+    difficulty: 0.20
+    band: easy
+    prompt: "In services/web.yaml, set cpu_m to 800."
+    gold_plan:
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: set_value, args: {path: services/web.yaml, key: cpu_m, value: "800"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/web.yaml, key: cpu_m, equals: 800}
+
+  - id: named_service_memory
+    difficulty: 0.34
+    band: easy
+    prompt: "Set memory_mi to 256 on the service whose name is worker. Work out which file that is."
+    gold_plan:
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: memory_mi, value: "256"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/worker.yaml, key: memory_mi, equals: 256}
+      - {path: services/api.yaml, key: memory_mi, unchanged: true}
+
+  - id: policy_owner
+    difficulty: 0.38
+    band: easy
+    prompt: "Exactly one file defines max_total_memory_mi. Set that value to 6144."
+    gold_plan:
+      - {tool: grep, args: {pattern: max_total_memory_mi}}
+      - {tool: set_value, args: {path: policy/limits.yaml, key: max_total_memory_mi, value: "6144"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: policy/limits.yaml, key: max_total_memory_mi, equals: 6144}
+
+  - id: no_op_trap
+    difficulty: 0.46
+    band: medium
+    prompt: >-
+      If any file under services/ has replicas strictly greater than 10, reduce that
+      service's replicas to 10. If none does, change nothing at all.
+    gold_plan:
+      - {tool: grep, args: {pattern: "replicas:"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/api.yaml, key: replicas, unchanged: true}
+      - {path: services/web.yaml, key: replicas, unchanged: true}
+      - {path: services/worker.yaml, key: replicas, unchanged: true}
+      - {path: services/cache.yaml, key: replicas, unchanged: true}
+      - {path: examples/web.yaml, key: replicas, unchanged: true}
+
+  - id: decoy_web_replicas
+    difficulty: 0.52
+    band: medium
+    decoy_path: examples/web.yaml
+    prompt: >-
+      Set replicas to 6 for the web service. Only files under services/ are live
+      configuration; anything under examples/ is documentation and must not change.
+    gold_plan:
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: set_value, args: {path: services/web.yaml, key: replicas, value: "6"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/web.yaml, key: replicas, equals: 6}
+      - {path: examples/web.yaml, key: replicas, unchanged: true}
+
+  - id: replica_cap
+    difficulty: 0.56
+    band: medium
+    prompt: "Set replicas on the worker service to the per-service maximum that policy/limits.yaml allows."
+    gold_plan:
+      - {tool: read_file, args: {path: policy/limits.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: replicas, value: "10"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/worker.yaml, key: replicas, equals: 10}
+
+  - id: grep_then_edit
+    difficulty: 0.58
+    band: medium
+    prompt: "Exactly one file under services/ sets cpu_m to 750. Set that file's cpu_m to 600."
+    gold_plan:
+      - {tool: grep, args: {pattern: "cpu_m: 750"}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: cpu_m, value: "600"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/worker.yaml, key: cpu_m, equals: 600}
+      - {path: services/web.yaml, key: cpu_m, unchanged: true}
+
+  - id: two_edits_one_file
+    difficulty: 0.60
+    band: medium
+    prompt: "In services/api.yaml, set cpu_m to 300 and memory_mi to 768."
+    gold_plan:
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: set_value, args: {path: services/api.yaml, key: cpu_m, value: "300"}}
+      - {tool: set_value, args: {path: services/api.yaml, key: memory_mi, value: "768"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/api.yaml, key: cpu_m, equals: 300}
+      - {path: services/api.yaml, key: memory_mi, equals: 768}
+
+  - id: cpu_consistency
+    difficulty: 0.64
+    band: medium
+    prompt: >-
+      services/web.yaml and services/worker.yaml must agree on cpu_m. Set both to the
+      smaller of their two current values.
+    gold_plan:
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: cpu_m, value: "500"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/web.yaml, key: cpu_m, equals: 500}
+      - {path: services/worker.yaml, key: cpu_m, equals: 500}
+
+  - id: summary_schema
+    difficulty: 0.74
+    band: hard
+    prompt: >-
+      Set replicas to 4 in services/api.yaml. Then finish with a summary that is a JSON
+      object with exactly the keys changed (a list of the workspace paths you modified),
+      total_memory_mi (the integer sum of memory_mi across the four files under
+      services/) and ok (the boolean true).
+    gold_plan:
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: set_value, args: {path: services/api.yaml, key: replicas, value: "4"}}
+      - tool: finish
+        args:
+          summary: '{"changed": ["services/api.yaml"], "total_memory_mi": 5120, "ok": true}'
+    checks:
+      - {path: services/api.yaml, key: replicas, equals: 4}
+      - summary:
+          exact_keys: [changed, total_memory_mi, ok]
+          values: {total_memory_mi: 5120, ok: true, changed: [services/api.yaml]}
+
+  - id: effective_footprint
+    difficulty: 0.78
+    band: hard
+    prompt: >-
+      A service's effective footprint is replicas multiplied by memory_mi. Across the
+      four files under services/, the total effective footprint must be at most 12000.
+      Achieve that by changing only worker's memory_mi, to the largest whole number that
+      satisfies it.
+    gold_plan:
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: memory_mi, value: "1080"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/worker.yaml, key: memory_mi, equals: 1080}
+      - {path: services/api.yaml, key: memory_mi, unchanged: true}
+      - {path: services/web.yaml, key: memory_mi, unchanged: true}
+      - {path: services/cache.yaml, key: memory_mi, unchanged: true}
+
+  - id: halve_large_memory
+    difficulty: 0.80
+    band: hard
+    prompt: >-
+      For every file under services/, if memory_mi is strictly greater than 1000, halve
+      it and round down. Leave any service at or below 1000 untouched.
+    gold_plan:
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: set_value, args: {path: services/web.yaml, key: memory_mi, value: "768"}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: memory_mi, value: "512"}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: set_value, args: {path: services/cache.yaml, key: memory_mi, value: "1024"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/web.yaml, key: memory_mi, equals: 768}
+      - {path: services/worker.yaml, key: memory_mi, equals: 512}
+      - {path: services/cache.yaml, key: memory_mi, equals: 1024}
+      - {path: services/api.yaml, key: memory_mi, unchanged: true}
+      - {path: examples/web.yaml, key: memory_mi, unchanged: true}
+
+  - id: cap_and_report
+    difficulty: 0.86
+    band: hard
+    prompt: >-
+      Set worker's replicas to the per-service maximum in policy/limits.yaml. Then lower
+      worker's memory_mi to the largest whole number that keeps the total effective
+      footprint across services/ at or below max_effective_footprint_mi from that same
+      file, where effective footprint is replicas multiplied by memory_mi. Finish with a
+      summary that is a JSON object with exactly the keys worker_replicas,
+      worker_memory_mi and total_footprint_mi.
+    gold_plan:
+      - {tool: read_file, args: {path: policy/limits.yaml}}
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: replicas, value: "10"}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: memory_mi, value: "1232"}}
+      - tool: finish
+        args:
+          summary: '{"worker_replicas": 10, "worker_memory_mi": 1232, "total_footprint_mi": 20000}'
+    checks:
+      - {path: services/worker.yaml, key: replicas, equals: 10}
+      - {path: services/worker.yaml, key: memory_mi, equals: 1232}
+      - summary:
+          exact_keys: [worker_replicas, worker_memory_mi, total_footprint_mi]
+          values: {worker_replicas: 10, worker_memory_mi: 1232, total_footprint_mi: 20000}

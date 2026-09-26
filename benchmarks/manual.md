@@ -108,3 +108,137 @@ calls.
 
 Verify by reading, not by assuming. If a `set_value` result does not show the
 value you intended, fix it before finishing.
+
+## Worked example: aggregating before deciding
+
+Task: "For every file under `services/` whose effective footprint is strictly greater
+than the mean effective footprint across those files, set `cpu_m` to 400."
+
+This is two passes, not one. Nothing can be decided until every value is in hand,
+because the mean depends on all four and the comparison depends on the mean.
+
+Read all four files first. Compute each footprint as `replicas * memory_mi`. Sum them,
+divide by four, and hold that number. Only then walk the four services again and issue
+one `set_value` for each whose footprint exceeds it. A service exactly equal to the mean
+is not strictly greater and is left alone.
+
+The mistake to avoid is deciding service by service as you read, comparing each footprint
+to the running average of the ones seen so far. That gets a different answer, and the
+answer changes with the order the files happened to be read in.
+
+## Worked example: two edits whose inputs change under them
+
+Task: "First set `worker`'s `memory_mi` to half of `web`'s current `memory_mi`, rounding
+down. Then set `web`'s `memory_mi` to half of `web`'s own current value, rounding down."
+
+Both edits read `web`'s `memory_mi`, and the first of them must use the value as it
+stands before either edit is applied. So read `web` once, at the start, and keep the
+number. If `web` holds 1536, `worker` becomes 768 and then `web` also becomes 768.
+
+The mistake to avoid is applying the second edit first, or re-reading `web` between the
+two. Either way `worker` ends up at 384, which is half of the already-halved value, and
+the task fails on a value that looks plausible.
+
+When a task fixes an order, the order is part of the task. Do not reorder edits because
+one looks more convenient to do first.
+
+## Worked example: when the answer is to do nothing
+
+Task: "Total memory must not exceed `max_total_memory_mi` from `policy/limits.yaml` minus
+3000. If it does, reduce `cache`'s `memory_mi` by exactly enough. If it does not, change
+nothing at all."
+
+Read the policy file and the four services. Suppose `max_total_memory_mi` is 8192, so the
+ceiling is 5192, and the four services hold 512, 1536, 1024 and 2048, summing to 5120.
+5120 does not exceed 5192, so the condition does not hold and the correct action is to
+call `finish` with no edits.
+
+Every part of this has to be checked before concluding. "Total memory" here is the plain
+sum, not the effective footprint, so `replicas` does not enter it. The ceiling is the
+policy value minus 3000, not the policy value. And `examples/` is excluded from the sum
+even though it contains a file with `memory_mi: 9999` that would change the answer.
+
+A conditional task whose condition turns out to be false is completed by doing nothing.
+Making a small reduction anyway, to have something to report, fails the task.
+
+## Worked example: the decoy
+
+Task: "Set `replicas` to 6 for the `web` service."
+
+There are two files with `name: web`. `services/web.yaml` is live configuration and
+`examples/web.yaml` is documentation that carries deliberately absurd values. The task
+means the live one.
+
+`grep` will show you both, and `list_files` will show you both. Filter to `services/`
+yourself. The same applies to any total: a sum over "the services" is a sum over the four
+files under `services/` and nothing else.
+
+## Quick reference
+
+Effective footprint of one service: `replicas * memory_mi`.
+Total effective footprint: that, summed over the four files under `services/`.
+Total memory: `memory_mi` summed over the same four files, without `replicas`.
+Per-service replica maximum: `max_replicas_per_service` in `policy/limits.yaml`.
+Rounding down: integer floor.
+Strictly greater than: excludes equality.
+Never edit: `name`, anything under `examples/`, `runbook.md`.
+One `set_value` call changes one key in one file.
+Read every value that enters a calculation; do not assume it from this manual.
+Call `finish` exactly once, last, with the summary the task asked for or `"{}"`.
+
+## Worked example: two constraints at once
+
+Task: "Change only `worker`'s `replicas` and `memory_mi` so that both hold: `replicas`
+equals the per-service maximum from `policy/limits.yaml`, and `worker`'s effective
+footprint is exactly 5120."
+
+One constraint fixes a value outright and the other then determines the second value.
+Take them in that order. Read the policy file: if `max_replicas_per_service` is 10, then
+`replicas` is 10, with no arithmetic. Now the footprint constraint reads
+`10 * memory_mi = 5120`, so `memory_mi` is 512. Two `set_value` calls, both on
+`services/worker.yaml`.
+
+The mistake to avoid is solving the footprint constraint against the current `replicas`
+of 4, getting 1280, and then changing `replicas` to 10 afterwards, which leaves the
+footprint at 12800. When one edit changes an input to another, do the fixing edit first
+and compute the second from the value you are about to write, not the value that is there.
+
+## Worked example: choosing a service, then reporting on it
+
+Task: "Identify the file under `services/` with the smallest effective footprint and set
+its `replicas` to the per-service maximum. Finish with a JSON object with exactly the keys
+`service`, `old_footprint_mi` and `new_footprint_mi`."
+
+Read the policy file and all four services. Compute the four footprints and take the
+smallest. Suppose `api` holds `replicas: 2, memory_mi: 512`, so its footprint is 1024 and
+that is the smallest. Set `api`'s `replicas` to 10.
+
+The two reported footprints are for that service alone, not for the whole suite, and the
+new one is computed from the value just written: `10 * 512 = 5120`. `service` is the
+service's `name`, which is `api`, not the path. So the summary is
+`{"service": "api", "old_footprint_mi": 1024, "new_footprint_mi": 5120}` and nothing else.
+
+An extra key fails the task, a missing key fails the task, and a total over all four
+services in place of the one service's footprint fails the task.
+
+## Diagnosing a failed call
+
+A failed `set_value` says which of the two things was wrong. "no such file" means the path
+does not exist, so list the files and use a path from that list verbatim. "has no key"
+means the file exists but that key does not, so read the file and use a key from its four.
+Neither error means the value was rejected; values are written as given.
+
+A `read_file` that fails means the path is wrong in the same way. Do not retry the same
+path; look it up.
+
+If a `set_value` succeeded but its result shows a value you did not intend, fix it with
+another `set_value` before finishing. Finishing on a state you know to be wrong fails the
+task just as surely as never editing at all.
+
+## On reporting confidence
+
+`finish` takes a `confidence` between 0 and 1. It should be your own probability that
+every required edit was made correctly and that no edit was made that was not required.
+Low confidence costs nothing: it routes the step to a stronger model. Reporting high
+confidence on work you are unsure of removes that option, so report the number you
+actually believe.

@@ -19,6 +19,11 @@ class Tier:
     usd_per_mtok_cached_in: float
     usd_per_mtok_out: float
     usd_per_mtok_hour_cache_storage: float = 1.00
+    # Vertex refuses to create an explicit cache below this many tokens, and the floor
+    # differs by model generation: 1,024 on the 2.5 models, 4,096 on the 3.x ones. It is
+    # per-tier rather than global because a prefix can be cacheable on one rung of the
+    # ladder and not on the next, which is a real and easy-to-miss property of the lever.
+    min_cacheable_tokens: int = 1024
     # Quality/latency knobs the simulated backend uses; ignored by the real backend.
     sim_skill: float = 0.5
     sim_latency_ms: float = 200.0
@@ -45,6 +50,7 @@ TIERS: dict[str, Tier] = {
     ),
     "mid2": Tier(
         name="mid2",
+        min_cacheable_tokens=4096,
         model="gemini-3.5-flash-lite",
         usd_per_mtok_in=0.30,
         usd_per_mtok_cached_in=0.03,
@@ -54,6 +60,7 @@ TIERS: dict[str, Tier] = {
     ),
     "strong": Tier(
         name="strong",
+        min_cacheable_tokens=4096,
         model="gemini-3.6-flash",
         usd_per_mtok_in=0.75,
         usd_per_mtok_cached_in=0.075,

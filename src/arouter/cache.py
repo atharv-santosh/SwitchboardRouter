@@ -7,9 +7,11 @@ from typing import Any, Protocol
 
 from .pricing import Usage, tier
 
-# Vertex AI refuses to create an explicit cache below this many tokens, so a prefix
-# smaller than the floor is not worth arranging the whole prompt around.
+# The smallest floor any tier imposes. The binding floor is per-tier; see
+# ``pricing.Tier.min_cacheable_tokens``.
 MIN_CACHEABLE_TOKENS = 1024
+# How far below a floor a prefix may estimate and still be worth offering to the provider.
+ESTIMATE_SLACK = 0.85
 
 
 class CacheBackend(Protocol):
@@ -39,6 +41,8 @@ class CacheStats:
     storage_token_hours: float = 0.0
     usd_saved_on_reads: float = 0.0
     usd_storage: float = 0.0
+    create_failures: int = 0
+    last_create_error: str | None = None
 
     @property
     def hit_rate(self) -> float:
@@ -48,13 +52,15 @@ class CacheStats:
     def usd_net_saving(self) -> float:
         return self.usd_saved_on_reads - self.usd_storage
 
-    def to_dict(self) -> dict[str, float | int]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "lookups": self.lookups,
             "hits": self.hits,
             "misses": self.misses,
             "creates": self.creates,
             "skipped_too_small": self.skipped_too_small,
+            "create_failures": self.create_failures,
+            "last_create_error": self.last_create_error,
             "hit_rate": round(self.hit_rate, 4),
             "cached_tokens_served": self.cached_tokens_served,
             "uncached_prefix_tokens_paid": self.uncached_prefix_tokens_paid,
@@ -70,6 +76,8 @@ class CacheStats:
         self.misses += other.misses
         self.creates += other.creates
         self.skipped_too_small += other.skipped_too_small
+        self.create_failures += other.create_failures
+        self.last_create_error = self.last_create_error or other.last_create_error
         self.cached_tokens_served += other.cached_tokens_served
         self.uncached_prefix_tokens_paid += other.uncached_prefix_tokens_paid
         self.storage_token_hours += other.storage_token_hours
@@ -118,14 +126,23 @@ class PrefixCache:
 
         self.stats.misses += 1
         self.stats.uncached_prefix_tokens_paid += estimated_tokens
-        if estimated_tokens < MIN_CACHEABLE_TOKENS:
+        spec = tier(tier_name)
+        # The local token estimate runs about 10% under the provider's count, so a prefix
+        # near the floor is not judged here. Try the create and let the provider refuse,
+        # which is recorded rather than raised. Only a prefix well clear of the floor is
+        # skipped without asking.
+        if estimated_tokens < spec.min_cacheable_tokens * ESTIMATE_SLACK:
             self.stats.skipped_too_small += 1
             return None
         if self.backend is None:
             return None
 
-        spec = tier(tier_name)
-        handle, tokens = self.backend.create(spec.model, prefix, tools, self.ttl_seconds)
+        try:
+            handle, tokens = self.backend.create(spec.model, prefix, tools, self.ttl_seconds)
+        except Exception as exc:  # noqa: BLE001 - a refused cache degrades to no cache, never to a failed run
+            self.stats.create_failures += 1
+            self.stats.last_create_error = f"{type(exc).__name__}: {exc}"[:240]
+            return None
         entry = CacheEntry(handle=handle, tokens=tokens, model=spec.model)
         self.entries[key] = entry
         self.stats.creates += 1

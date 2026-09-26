@@ -156,3 +156,28 @@ def counterfactual_usd_without_cache(usages: list[Usage]) -> float:
             + (usage.tokens_out + usage.tokens_thought) * spec.usd_per_mtok_out
         ) / 1_000_000
     return total
+
+
+@dataclass
+class LocalCacheBackend:
+    """Stands in for a provider cache offline, counting tokens the way the tokenizer estimate does.
+
+    It exists so the cache accounting is exercised with zero credentials. It does not
+    simulate a provider's eviction, minimum size beyond the documented floor, or TTL
+    expiry mid-run, so the offline hit rate is an upper bound on a real one and is
+    labelled as simulated wherever it is reported.
+    """
+
+    chars_per_token: float = 3.9
+    handles: dict[str, int] = field(default_factory=dict)
+
+    def create(self, model: str, prefix: str, tools: list[Any], ttl_seconds: int) -> tuple[str, int]:
+        from .events import content_hash
+
+        tokens = max(1, int((len(prefix) + len(str(tools))) / self.chars_per_token))
+        handle = f"local://{model}/{content_hash({'p': prefix, 't': tools})[:16]}"
+        self.handles[handle] = tokens
+        return handle, tokens
+
+    def delete(self, handle: str) -> None:
+        self.handles.pop(handle, None)

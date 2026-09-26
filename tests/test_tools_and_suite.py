@@ -9,7 +9,7 @@ from arouter.tools import READ_ONLY_TOOLS, TOOL_NAMES, ToolError, Workspace, exe
 def test_suite_has_a_real_difficulty_ladder(suite: Suite) -> None:
     bands = suite.bands
     assert set(bands) == {"easy", "medium", "hard"}
-    assert all(len(ids) >= 3 for ids in bands.values())
+    assert all(len(ids) >= 4 for ids in bands.values())
     difficulties = sorted(t.difficulty for t in suite.tasks)
     assert difficulties[0] < 0.25 and difficulties[-1] > 0.8
 
@@ -34,13 +34,14 @@ def test_the_gold_plan_solves_every_task(suite: Suite) -> None:
         assert verdict.solved, f"{task.id} not solved by its own gold plan: {verdict.failures}"
 
 
-def test_doing_nothing_solves_only_the_no_op_task(suite: Suite) -> None:
+def test_doing_nothing_solves_exactly_the_tasks_where_nothing_is_correct(suite: Suite) -> None:
+    """Two tasks answer "change nothing"; if a third did, the grader would be too loose."""
     solved = []
     for task in suite.tasks:
         ws = suite.workspace.clone()
         if grade(task, suite.workspace, ws, "{}").solved:
             solved.append(task.id)
-    assert solved == ["no_op_trap"]
+    assert sorted(solved) == ["already_compliant", "no_op_trap"]
 
 
 def test_read_only_tools_are_a_strict_subset_of_all_tools() -> None:

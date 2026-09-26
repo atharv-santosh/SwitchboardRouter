@@ -284,3 +284,137 @@ tasks:
       - summary:
           exact_keys: [worker_replicas, worker_memory_mi, total_footprint_mi]
           values: {worker_replicas: 10, worker_memory_mi: 1232, total_footprint_mi: 20000}
+
+  # The six tasks below were added after the first real run, where
+  # gemini-2.5-flash-lite solved 11 of the first 14. A cheap tier that clears 79% of
+  # the suite leaves a cascade three tasks of headroom to argue over, which is not
+  # enough to separate the policies. These target what it actually got wrong:
+  # aggregating values across four files before deciding, ordering two edits whose
+  # inputs change, and recognising that the correct action is no action.
+
+  - id: ignore_the_runbook
+    difficulty: 0.70
+    band: hard
+    prompt: >-
+      runbook.md suggests scaling the web tier. Ignore that advice. Set replicas to 2 on
+      whichever file under services/ has the largest memory_mi.
+    gold_plan:
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: set_value, args: {path: services/cache.yaml, key: replicas, value: "2"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/cache.yaml, key: replicas, equals: 2}
+      - {path: services/web.yaml, key: replicas, unchanged: true}
+      - {path: services/api.yaml, key: replicas, unchanged: true}
+      - {path: services/worker.yaml, key: replicas, unchanged: true}
+
+  - id: already_compliant
+    difficulty: 0.76
+    band: hard
+    prompt: >-
+      Total memory is the plain sum of memory_mi across the four files under services/,
+      without multiplying by replicas. It must not exceed max_total_memory_mi from
+      policy/limits.yaml minus 3000. If it does exceed that, reduce cache's memory_mi by
+      exactly enough to comply. If it does not, change nothing at all.
+    gold_plan:
+      - {tool: read_file, args: {path: policy/limits.yaml}}
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/api.yaml, key: memory_mi, unchanged: true}
+      - {path: services/web.yaml, key: memory_mi, unchanged: true}
+      - {path: services/worker.yaml, key: memory_mi, unchanged: true}
+      - {path: services/cache.yaml, key: memory_mi, unchanged: true}
+
+  - id: order_dependent_edits
+    difficulty: 0.82
+    band: hard
+    prompt: >-
+      Apply these two edits in this order. First set worker's memory_mi to half of web's
+      current memory_mi, rounding down. Then set web's memory_mi to half of web's own
+      current value, rounding down.
+    gold_plan:
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: memory_mi, value: "768"}}
+      - {tool: set_value, args: {path: services/web.yaml, key: memory_mi, value: "768"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/worker.yaml, key: memory_mi, equals: 768}
+      - {path: services/web.yaml, key: memory_mi, equals: 768}
+
+  - id: smallest_footprint_report
+    difficulty: 0.84
+    band: hard
+    prompt: >-
+      Effective footprint is replicas multiplied by memory_mi. Identify the file under
+      services/ with the smallest effective footprint and set its replicas to the
+      per-service maximum in policy/limits.yaml. Finish with a summary that is a JSON
+      object with exactly the keys service (that service's name), old_footprint_mi and
+      new_footprint_mi.
+    gold_plan:
+      - {tool: read_file, args: {path: policy/limits.yaml}}
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: set_value, args: {path: services/api.yaml, key: replicas, value: "10"}}
+      - tool: finish
+        args:
+          summary: '{"service": "api", "old_footprint_mi": 1024, "new_footprint_mi": 5120}'
+    checks:
+      - {path: services/api.yaml, key: replicas, equals: 10}
+      - {path: services/web.yaml, key: replicas, unchanged: true}
+      - {path: services/cache.yaml, key: replicas, unchanged: true}
+      - summary:
+          exact_keys: [service, old_footprint_mi, new_footprint_mi]
+          values: {service: api, old_footprint_mi: 1024, new_footprint_mi: 5120}
+
+  - id: mean_footprint_cpu
+    difficulty: 0.88
+    band: hard
+    prompt: >-
+      Effective footprint is replicas multiplied by memory_mi. Compute the mean effective
+      footprint across the four files under services/. For every file whose effective
+      footprint is strictly greater than that mean, set cpu_m to 400. Change nothing else.
+    gold_plan:
+      - {tool: list_files, args: {}}
+      - {tool: read_file, args: {path: services/api.yaml}}
+      - {tool: read_file, args: {path: services/web.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: read_file, args: {path: services/cache.yaml}}
+      - {tool: set_value, args: {path: services/web.yaml, key: cpu_m, value: "400"}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: cpu_m, value: "400"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/web.yaml, key: cpu_m, equals: 400}
+      - {path: services/worker.yaml, key: cpu_m, equals: 400}
+      - {path: services/api.yaml, key: cpu_m, unchanged: true}
+      - {path: services/cache.yaml, key: cpu_m, unchanged: true}
+
+  - id: two_constraints
+    difficulty: 0.90
+    band: hard
+    prompt: >-
+      Change only worker's replicas and memory_mi so that both hold at once: worker's
+      replicas equals the per-service maximum from policy/limits.yaml, and worker's
+      effective footprint, meaning replicas multiplied by memory_mi, is exactly 5120.
+    gold_plan:
+      - {tool: read_file, args: {path: policy/limits.yaml}}
+      - {tool: read_file, args: {path: services/worker.yaml}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: replicas, value: "10"}}
+      - {tool: set_value, args: {path: services/worker.yaml, key: memory_mi, value: "512"}}
+      - {tool: finish, args: {summary: "{}"}}
+    checks:
+      - {path: services/worker.yaml, key: replicas, equals: 10}
+      - {path: services/worker.yaml, key: memory_mi, equals: 512}
+      - {path: services/web.yaml, key: memory_mi, unchanged: true}

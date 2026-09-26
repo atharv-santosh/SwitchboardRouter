@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from arouter.cache import MIN_CACHEABLE_TOKENS, LocalCacheBackend, PrefixCache, counterfactual_usd_without_cache
+from arouter.cache import (
+    ESTIMATE_SLACK,
+    MIN_CACHEABLE_TOKENS,
+    LocalCacheBackend,
+    PrefixCache,
+    counterfactual_usd_without_cache,
+)
 from arouter.context import CacheAwareLayout, Context, NaiveLayout, layout, prefix_hash
 from arouter.pricing import Usage, tier
 
@@ -75,13 +81,48 @@ def test_cache_records_a_miss_then_hits_forever() -> None:
     assert cache.stats.hit_rate == pytest.approx(0.9)
 
 
-def test_a_prefix_below_the_floor_is_never_cached() -> None:
+def test_a_prefix_well_below_the_floor_is_never_offered_to_the_provider() -> None:
     cache = PrefixCache(backend=LocalCacheBackend())
     h = prefix_hash("tiny", [])
     for _ in range(3):
-        assert cache.lookup_or_create("cheap", "tiny", [], h, MIN_CACHEABLE_TOKENS - 1) is None
+        assert cache.lookup_or_create("cheap", "tiny", [], h, 100) is None
     assert cache.stats.creates == 0
     assert cache.stats.skipped_too_small == 3
+
+
+def test_a_prefix_near_the_floor_is_offered_rather_than_judged_locally() -> None:
+    """The local estimate runs under the provider's count, so borderline is the provider's call."""
+    cache = PrefixCache(backend=LocalCacheBackend())
+    text = "x" * 5000
+    h = prefix_hash(text, [])
+    cache.lookup_or_create("cheap", text, [], h, int(MIN_CACHEABLE_TOKENS * ESTIMATE_SLACK) + 1)
+    assert cache.stats.creates == 1 and cache.stats.skipped_too_small == 0
+
+
+def test_the_floor_is_per_tier() -> None:
+    cache = PrefixCache(backend=LocalCacheBackend())
+    text = "y" * 8000
+    h = prefix_hash(text, [])
+    assert tier("strong").min_cacheable_tokens > tier("cheap").min_cacheable_tokens
+    cache.lookup_or_create("cheap", text, [], h, 1500)
+    cache.lookup_or_create("strong", text, [], h, 1500)
+    assert cache.stats.creates == 1
+    assert cache.stats.skipped_too_small == 1
+
+
+def test_a_refused_create_is_recorded_not_raised() -> None:
+    class Refusing:
+        def create(self, model, prefix, tools, ttl_seconds):
+            raise RuntimeError("400 INVALID_ARGUMENT minimum token count is 4096")
+
+        def delete(self, handle):
+            pass
+
+    cache = PrefixCache(backend=Refusing())
+    text = "z" * 9000
+    assert cache.lookup_or_create("cheap", text, [], prefix_hash(text, []), 2000) is None
+    assert cache.stats.create_failures == 1
+    assert "4096" in (cache.stats.last_create_error or "")
 
 
 def test_caches_are_keyed_per_tier() -> None:

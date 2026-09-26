@@ -52,6 +52,12 @@ class CacheStats:
     def usd_net_saving(self) -> float:
         return self.usd_saved_on_reads - self.usd_storage
 
+    def summary_line(self) -> str:
+        return (
+            f"hit rate {self.hit_rate:6.1%}  creates {self.creates:3}  "
+            f"cached tokens {self.cached_tokens_served:9,}  net {self.usd_net_saving:+.6f} USD"
+        )
+
     def to_dict(self) -> dict[str, object]:
         return {
             "lookups": self.lookups,

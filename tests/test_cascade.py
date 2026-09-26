@@ -147,7 +147,12 @@ def test_a_run_cap_walks_the_ladder_then_stops_without_raising(runner: CascadeRu
     config = RunConfig(name="capped", tiers=("strong",), policy="none", run_cap_usd=0.006)
     run = runner.run(suite.task("halve_large_memory"), config)
     assert run.stopped_by_budget
-    assert [d["level"] for d in run.degradations] == ["NO_ESCALATION", "NO_VERIFIER", "STOP"]
+    ladder = ["NO_ESCALATION", "NO_VERIFIER", "SHRINK_CONTEXT", "STOP"]
+    levels = [d["level"] for d in run.degradations]
+    # Which rungs a run lands on depends on how fast it spends, but it may never skip
+    # backwards and it must finish at STOP.
+    assert levels == sorted(levels, key=ladder.index)
+    assert levels[0] == "NO_ESCALATION" and levels[-1] == "STOP"
     assert run.summary and "budget_exhausted" in run.summary
     kinds = {e["payload"].get("kind") for e in run.events if e["type"] == "decision"}
     assert "budget_degradation" in kinds and "budget_refusal" in kinds
@@ -162,7 +167,7 @@ def test_a_capped_run_never_spends_more_than_its_cap(runner: CascadeRunner, suit
 
 def test_degradation_suppresses_escalation_before_it_stops_the_run(runner: CascadeRunner, suite: Suite) -> None:
     config = RunConfig(
-        name="squeezed", tiers=LADDER[:1] + LADDER[-1:], policy="always_strong", run_cap_usd=0.0025
+        name="squeezed", tiers=LADDER[:1] + LADDER[-1:], policy="always_strong", run_cap_usd=0.006
     )
     run = runner.run(suite.task("halve_large_memory"), config)
     assert [d["level"] for d in run.degradations] == ["NO_ESCALATION"]

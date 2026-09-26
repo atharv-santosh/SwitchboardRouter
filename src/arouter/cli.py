@@ -307,11 +307,7 @@ def cache_study(
                 **stats,
             }
         )
-        click.echo(
-            f"{name:24} hit rate {stats['hit_rate']:6.1%}  creates {stats['creates']:3}  "
-            f"cached tokens {stats['cached_tokens_served']:9,}  spend {_fmt(result.usd_total)}  "
-            f"net cache saving {_fmt(stats['usd_net_saving'])}"
-        )
+        click.echo(f"{name:24} {result.cache.summary_line()}  spend {_fmt(result.usd_total)}")
     baseline = next(r for r in rows if r["name"] == "cache_aware_uncached")
     for row in rows:
         row["usd_vs_uncached"] = row["usd_total"] - baseline["usd_total"]

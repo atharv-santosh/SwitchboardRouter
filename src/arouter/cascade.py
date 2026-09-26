@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Protocol
 
-from .budget import BudgetEnforcer, Degradation
+from .budget import BudgetEnforcer
 from .cache import PrefixCache
 from .context import Context, layout as make_layout
 from .events import Recorder
@@ -315,7 +315,7 @@ class CascadeRunner:
             cached_tokens = entry.tokens if entry else 0
 
             if not budget.can_afford(tier_used, prompt_tokens, cached_tokens, request.max_output_tokens):
-                budget.level = Degradation.STOP
+                budget.force_stop(f"next {tier_used} call would exceed the binding cap")
                 stopped_by_budget = True
                 recorder.emit(
                     "decision",

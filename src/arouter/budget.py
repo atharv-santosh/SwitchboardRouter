@@ -66,6 +66,14 @@ class BudgetEnforcer:
             Degradation.STOP: 1.00,
         }
     )
+    # Reserving the full output budget plus thinking headroom is the only hard bound, but
+    # it is roughly five times what a single tool call actually emits, which makes any
+    # realistic cap refuse the first call. So the default reserve is a calibrated p95 of
+    # observed tool-call output including thinking tokens, and the consequence is stated
+    # rather than hidden: a cap can be overshot by at most one call's cost. `strict_bound`
+    # restores the hard guarantee for callers who need it.
+    output_estimate_tokens: int = 320
+    strict_bound: bool = False
     run_spent_usd: float = 0.0
     level: Degradation = Degradation.NONE
     transitions: list[dict[str, object]] = field(default_factory=list)
@@ -81,8 +89,11 @@ class BudgetEnforcer:
 
     def fraction_used(self) -> float:
         cap = self.binding_cap
-        if cap is None or cap <= 0:
+        if cap is None:
             return 0.0
+        # A cap of zero is a cap that is already reached, not a cap that does not apply.
+        if cap <= 0:
+            return 1.0
         return self.run_spent_usd / cap
 
     def estimate_usd(self, tier_name: str, prompt_tokens: int, cached_tokens: int, max_output_tokens: int) -> float:
@@ -90,7 +101,7 @@ class BudgetEnforcer:
         spec = tier(tier_name)
         uncached = max(0, prompt_tokens - cached_tokens)
         # Thinking tokens are billed as output, so budget for them before they arrive.
-        out = max_output_tokens * 2.5
+        out = max_output_tokens * 2.5 if self.strict_bound else float(self.output_estimate_tokens)
         return (
             uncached * spec.usd_per_mtok_in
             + cached_tokens * spec.usd_per_mtok_cached_in
@@ -130,6 +141,21 @@ class BudgetEnforcer:
         if self.strict and self.level >= Degradation.STOP:
             raise BudgetExceeded(f"run spend {self.run_spent_usd:.6f} exceeded cap {cap:.6f}")
         return new
+
+    def force_stop(self, reason: str) -> dict[str, object]:
+        """Stop the run now, recording it as a transition so a refusal is auditable too."""
+        self.level = Degradation.STOP
+        record = {
+            "level": self.level.name,
+            "fraction_used": round(self.fraction_used(), 4),
+            "run_spent_usd": self.run_spent_usd,
+            "cap_usd": self.binding_cap,
+            "reason": reason,
+        }
+        self.transitions.append(record)
+        if self.strict:
+            raise BudgetExceeded(reason)
+        return record
 
     @property
     def allow_escalation(self) -> bool:

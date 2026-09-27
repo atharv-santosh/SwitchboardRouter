@@ -46,6 +46,27 @@ class ToolPredictor:
             self.by_task[(task_id, ctx)][keys[i]] += 1
             self.by_band[(band, ctx)][tools[i]] += 1
 
+    @classmethod
+    def from_trajectories(cls, directory: str, config: str | None = None, order: int = 2) -> ToolPredictor:
+        """Fit straight from recorded JSONL, so no model has to be called or replayed to fit."""
+        from .events import iter_runs
+
+        predictor = cls(order=order)
+        for run_id, events in iter_runs(directory):
+            if config is not None and not run_id.startswith(f"{config}::"):
+                continue
+            task_id, band, sequence = "", "medium", []
+            for event in events:
+                if event.type == "run_start":
+                    task_id = str(event.payload.get("task_id", ""))
+                    band = str(event.payload.get("band", "medium"))
+                elif event.type == "tool_call":
+                    request = event.payload.get("request", {})
+                    sequence.append((str(request.get("tool", "")), dict(request.get("args", {}))))
+            if task_id and sequence:
+                predictor.observe(task_id, band, sequence)
+        return predictor
+
     def predict(self, task_id: str, band: str, recent_tools: list[str]) -> tuple[str, dict[str, Any], float] | None:
         """Return (tool, args, probability) for the next call, or None when nothing is known."""
         ctx = tuple(recent_tools[-self.order :])

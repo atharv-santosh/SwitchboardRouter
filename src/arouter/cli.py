@@ -333,6 +333,10 @@ def cache_study(
 @click.option("--tool-usd", type=float, default=0.0002, show_default=True, help="Cost of one tool call.")
 @click.option("--usd-per-second", type=float, default=0.002, show_default=True, help="What a second of latency is worth.")
 @click.option("--tier", default="cheap", show_default=True)
+@click.option("--backend", type=click.Choice(["simulated", "replay"]), default="simulated", show_default=True)
+@click.option("--fixtures", type=click.Path(), default=None, help="Trajectory directory for --backend replay.")
+@click.option("--replay-config", default="single_cheap", show_default=True, help="Which recorded config to replay.")
+@click.option("--fit-on", default="single_mid", show_default=True, help="Which recorded config to fit the predictor on.")
 def prefetch_study(
     suite_path: str | None,
     out: str,
@@ -341,12 +345,34 @@ def prefetch_study(
     tool_usd: float,
     usd_per_second: float,
     tier: str,
+    backend: str,
+    fixtures: str | None,
+    replay_config: str,
+    fit_on: str,
 ) -> None:
-    """Sweep tool latency and prediction threshold to find where speculation stops paying."""
+    """Sweep tool latency and prediction threshold to find where speculation stops paying.
+
+    With --backend replay the model latencies are the real ones recorded against Vertex, so
+    the saving is measured against real model time rather than the simulated stub's.
+    """
     suite = load_suite(suite_path)
-    warmup = RunConfig(name="warmup", tiers=(tier,), policy="none")
-    warm = run_config(suite, warmup, BenchOptions(factory=SimulatedFactory(seed=0)))
-    predictor = fit_predictor_from([warm])
+    if backend == "replay":
+        if not fixtures:
+            raise click.ClickException("--fixtures is required with --backend replay")
+        # The predictor is fitted on a different recorded configuration than the one being
+        # replayed, so it has never seen the exact run whose tool calls it must predict.
+        predictor = ToolPredictor.from_trajectories(fixtures, config=fit_on)
+        if not predictor.by_task:
+            raise click.ClickException(f"no recorded tool calls for {fit_on} under {fixtures}")
+        play_index = FixtureIndex.load(fixtures, config=replay_config)
+        if not len(play_index):
+            raise click.ClickException(f"no recorded calls for {replay_config} under {fixtures}")
+        make_factory: Any = lambda: ReplayFactory(index=FixtureIndex.load(fixtures, config=replay_config))
+    else:
+        warmup = RunConfig(name="warmup", tiers=(tier,), policy="none")
+        warm = run_config(suite, warmup, BenchOptions(factory=SimulatedFactory(seed=0)))
+        predictor = fit_predictor_from([warm])
+        make_factory = lambda: SimulatedFactory(seed=0)
 
     rows: list[dict[str, Any]] = []
     for raw_latency in latencies.split(","):
@@ -367,7 +393,7 @@ def prefetch_study(
             with prefetcher:
                 runner = CascadeRunner(
                     suite,
-                    SimulatedFactory(seed=0),
+                    make_factory(),
                     prefix_cache=PrefixCache(enabled=False),
                     prefetcher=prefetcher,
                 )
@@ -391,6 +417,8 @@ def prefetch_study(
                     "break_even_hit_rate": round(break_even, 4),
                     "pays_off": stats.hit_rate >= break_even,
                     "solved": sum(1 for r in runs if r.solved),
+                    "backend": backend,
+                    "model_ms_p50": round(percentile([s.critical_path_ms for r in runs for s in r.steps], 0.5), 1),
                 }
             )
             click.echo(

@@ -304,3 +304,59 @@ def total_spend(results: Iterable[ConfigResult]) -> Spend:
         for run in result.runs:
             total.merge(run.spend)
     return total
+
+
+def pareto_front_of_rows(rows: list[dict[str, Any]]) -> list[str]:
+    """Pareto front over already-serialized config rows, for merging runs done separately."""
+    front: list[str] = []
+    for a in rows:
+        dominated = any(
+            b is not a
+            and b["success_rate"] >= a["success_rate"]
+            and b["usd_per_task"] <= a["usd_per_task"]
+            and (b["success_rate"] > a["success_rate"] or b["usd_per_task"] < a["usd_per_task"])
+            for b in rows
+        )
+        if not dominated:
+            front.append(a["config"]["name"])
+    return front
+
+
+def merge_reports(payloads: list[dict[str, Any]], baseline: str = f"single_{BASELINE_TIER}") -> dict[str, Any]:
+    """Combine reports produced by separate invocations into one frontier.
+
+    Quota made one process per configuration the only way to finish, so the frontier is
+    assembled from the rows that actually completed. A configuration that never ran is
+    absent rather than filled in.
+    """
+    if not payloads:
+        raise ValueError("nothing to merge")
+    rows: dict[str, dict[str, Any]] = {}
+    for payload in payloads:
+        for row in payload["configs"]:
+            rows[row["config"]["name"]] = row
+    ordered = sorted(rows.values(), key=lambda r: r["usd_per_task"])
+    base = rows.get(baseline)
+    for row in ordered:
+        row.pop("usd_per_solved_vs_baseline", None)
+        row.pop("success_delta_vs_baseline", None)
+        if base and base.get("usd_per_solved_task") and row.get("usd_per_solved_task"):
+            row["usd_per_solved_vs_baseline"] = round(
+                row["usd_per_solved_task"] / base["usd_per_solved_task"], 4
+            )
+            row["success_delta_vs_baseline"] = round(row["success_rate"] - base["success_rate"], 4)
+    first = payloads[0]
+    notes = {"merged_from": len(payloads), "configs_present": [r["config"]["name"] for r in ordered]}
+    for payload in payloads:
+        notes.update(payload.get("notes", {}))
+    return {
+        "backend": first["backend"],
+        "suite": first["suite"],
+        "baseline": baseline,
+        "price_table_date": first["price_table_date"],
+        "tiers": first["tiers"],
+        "verifier_tier": first.get("verifier_tier", VERIFIER_TIER),
+        "pareto_front": pareto_front_of_rows(ordered),
+        "notes": notes,
+        "configs": ordered,
+    }

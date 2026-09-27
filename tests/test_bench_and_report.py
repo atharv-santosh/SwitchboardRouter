@@ -134,3 +134,37 @@ def test_the_html_report_survives_a_config_that_solved_nothing(suite: Suite) -> 
     result = _result(suite, RunConfig(name="tiny", tiers=("cheap",), policy="none", max_steps=1))
     html = render(BenchReport(backend="simulated", suite_path="s", results=[result]).to_dict())
     assert "<svg" in html
+
+
+def test_merging_separate_runs_rebuilds_one_frontier(suite: Suite) -> None:
+    """Quota forced one process per configuration, so merging has to give the same answer."""
+    from arouter.bench import merge_reports
+
+    payloads = []
+    for tier_name in ("cheap", "strong"):
+        result = _result(suite, RunConfig(name=f"single_{tier_name}", tiers=(tier_name,), policy="none"))
+        payloads.append(BenchReport(backend="simulated", suite_path="s", results=[result]).to_dict())
+    merged = merge_reports(payloads)
+    names = [c["config"]["name"] for c in merged["configs"]]
+    assert names == ["single_cheap", "single_strong"]
+    assert merged["pareto_front"]
+    cheap = merged["configs"][0]
+    assert cheap["usd_per_solved_vs_baseline"] < 1.0
+    assert cheap["success_delta_vs_baseline"] < 0.0
+
+
+def test_merging_states_which_configs_are_present(suite: Suite) -> None:
+    from arouter.bench import merge_reports
+
+    result = _result(suite, RunConfig(name="single_cheap", tiers=("cheap",), policy="none"))
+    merged = merge_reports([BenchReport(backend="simulated", suite_path="s", results=[result]).to_dict()])
+    assert merged["notes"]["configs_present"] == ["single_cheap"]
+    # With no baseline row there is nothing to take a ratio against, and none is invented.
+    assert "usd_per_solved_vs_baseline" not in merged["configs"][0]
+
+
+def test_merging_nothing_is_an_error() -> None:
+    from arouter.bench import merge_reports
+
+    with pytest.raises(ValueError, match="nothing to merge"):
+        merge_reports([])

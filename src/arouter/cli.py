@@ -15,6 +15,7 @@ from .bench import (
     SimulatedFactory,
     default_configs,
     fit_predictor_from,
+    merge_reports,
     percentile,
     run_config,
 )
@@ -459,6 +460,34 @@ def budget_demo(suite_path: str | None, run_caps: str, tenant_cap_usd: float, ou
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     Path(out).write_text(json.dumps({"per_run_caps": rows, "shared_tenant": tenant_rows}, indent=2, sort_keys=True))
     click.echo(f"wrote {out}")
+
+
+@main.command()
+@click.argument("inputs", nargs=-1, required=True, type=click.Path(exists=True))
+@click.option("--out", type=click.Path(), default="out/bench.json", show_default=True)
+@click.option("--html", "html_out", type=click.Path(), default=None)
+def merge(inputs: tuple[str, ...], out: str, html_out: str | None) -> None:
+    """Combine bench results produced by separate runs into one frontier."""
+    payloads = [json.loads(Path(p).read_text()) for p in inputs]
+    merged = merge_reports(payloads)
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_text(json.dumps(merged, indent=2, sort_keys=True, default=str))
+    base = next((c for c in merged["configs"] if c["config"]["name"] == merged["baseline"]), None)
+    for c in merged["configs"]:
+        ratio = c.get("usd_per_solved_vs_baseline")
+        click.echo(
+            f"{c['config']['name']:30} solved {c['solved']:2}/{c['n_tasks']:2}  "
+            f"{_fmt(c['usd_per_task'])}/task  {_fmt(c['usd_per_solved_task'] or float('inf'))}/solved  "
+            f"{(f'{ratio:.2f}x' if ratio else '   n/a'):>7}  "
+            f"p50 {c['p50_ms']:7.0f}ms  p95 {c['p95_ms']:7.0f}ms"
+        )
+    if base is None:
+        click.echo(f"\nbaseline {merged['baseline']} is absent, so no ratios were computed", err=True)
+    click.echo(f"\npareto front: {', '.join(merged['pareto_front'])}")
+    click.echo(f"wrote {out}")
+    if html_out:
+        write_report(merged, html_out)
+        click.echo(f"wrote {html_out}")
 
 
 @main.command()

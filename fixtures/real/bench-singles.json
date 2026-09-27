@@ -1,0 +1,2147 @@
+{
+  "backend": "vertex",
+  "baseline": "single_strong",
+  "configs": [
+    {
+      "cache": {
+        "cached_tokens_served": 356400,
+        "create_failures": 0,
+        "creates": 1,
+        "hit_rate": 0.9888,
+        "hits": 88,
+        "last_create_error": null,
+        "lookups": 89,
+        "misses": 1,
+        "skipped_too_small": 0,
+        "storage_token_hours": 1012.5,
+        "uncached_prefix_tokens_paid": 3628,
+        "usd_net_saving": 0.031063500000000008,
+        "usd_saved_on_reads": 0.03207600000000001,
+        "usd_storage": 0.0010125
+      },
+      "calls": 89,
+      "config": {
+        "cache_enabled": true,
+        "confidence_threshold": 0.75,
+        "layout": "cache_aware",
+        "learned_threshold": 0.5,
+        "max_steps": 10,
+        "name": "single_cheap",
+        "policy": "none",
+        "prefetch_enabled": false,
+        "run_cap_usd": null,
+        "tiers": [
+          "cheap"
+        ],
+        "tool_latency_ms": 0.0
+      },
+      "escalations": 0,
+      "mean_ms": 6378.4,
+      "n_tasks": 20,
+      "p50_ms": 6651.9,
+      "p95_ms": 13632.3,
+      "policy": {
+        "decisions": 0,
+        "escalation_rate": 0.0,
+        "escalations": 0,
+        "latency_overhead_ms": 0.0,
+        "overhead_calls": 0,
+        "usd_overhead": 0.0
+      },
+      "prefetch": {
+        "considered": 0,
+        "coverage": 0.0,
+        "hit_rate": 0.0,
+        "hits": 0,
+        "launched": 0,
+        "misses": 0,
+        "ms_saved": 0.0,
+        "ms_wasted": 0.0,
+        "skipped_low_confidence": 0,
+        "skipped_no_prediction": 0,
+        "skipped_not_readonly": 0,
+        "usd_wasted": 0.0
+      },
+      "runs": [
+        {
+          "band": "easy",
+          "calls": 2,
+          "config": "single_cheap",
+          "critical_path_ms": 1889.9,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 2,
+          "run_id": "single_cheap::api_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "api_replicas",
+          "tokens_cached_in": 4050,
+          "tokens_in": 8179,
+          "tokens_out": 76,
+          "usd": 0.0004838,
+          "usd_by_tier": {
+            "cheap": 0.0004838
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 2,
+          "config": "single_cheap",
+          "critical_path_ms": 1769.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 2,
+          "run_id": "single_cheap::web_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "web_cpu",
+          "tokens_cached_in": 8100,
+          "tokens_in": 8194,
+          "tokens_out": 234,
+          "usd": 0.000184,
+          "usd_by_tier": {
+            "cheap": 0.000184
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 3,
+          "config": "single_cheap",
+          "critical_path_ms": 3207.4,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_cheap::named_service_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "named_service_memory",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12388,
+          "tokens_out": 416,
+          "usd": 0.00031170000000000004,
+          "usd_by_tier": {
+            "cheap": 0.00031170000000000004
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 2,
+          "config": "single_cheap",
+          "critical_path_ms": 1767.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 2,
+          "run_id": "single_cheap::policy_owner::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "policy_owner",
+          "tokens_cached_in": 8100,
+          "tokens_in": 8214,
+          "tokens_out": 244,
+          "usd": 0.00019,
+          "usd_by_tier": {
+            "cheap": 0.00019
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_cheap",
+          "critical_path_ms": 5653.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_cheap::no_op_trap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "no_op_trap",
+          "tokens_cached_in": 20250,
+          "tokens_in": 20941,
+          "tokens_out": 766,
+          "usd": 0.000578,
+          "usd_by_tier": {
+            "cheap": 0.000578
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 2,
+          "config": "single_cheap",
+          "critical_path_ms": 2495.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 2,
+          "run_id": "single_cheap::decoy_web_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "decoy_web_replicas",
+          "tokens_cached_in": 8100,
+          "tokens_in": 8213,
+          "tokens_out": 455,
+          "usd": 0.0002743,
+          "usd_by_tier": {
+            "cheap": 0.0002743
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 3,
+          "config": "single_cheap",
+          "critical_path_ms": 2700.9,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_cheap::replica_cap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "replica_cap",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12395,
+          "tokens_out": 451,
+          "usd": 0.0003264,
+          "usd_by_tier": {
+            "cheap": 0.0003264
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 2,
+          "config": "single_cheap",
+          "critical_path_ms": 2338.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:cpu_m is '750', want '600'"
+          ],
+          "n_steps": 2,
+          "run_id": "single_cheap::grep_then_edit::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "grep_then_edit",
+          "tokens_cached_in": 8100,
+          "tokens_in": 8204,
+          "tokens_out": 401,
+          "usd": 0.0002518,
+          "usd_by_tier": {
+            "cheap": 0.0002518
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 3,
+          "config": "single_cheap",
+          "critical_path_ms": 2951.9,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_cheap::two_edits_one_file::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_edits_one_file",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12388,
+          "tokens_out": 424,
+          "usd": 0.0003149,
+          "usd_by_tier": {
+            "cheap": 0.0003149
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_cheap",
+          "critical_path_ms": 6680.4,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_cheap::cpu_consistency::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "cpu_consistency",
+          "tokens_cached_in": 20250,
+          "tokens_in": 20903,
+          "tokens_out": 1060,
+          "usd": 0.0006918,
+          "usd_by_tier": {
+            "cheap": 0.0006918
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_cheap",
+          "critical_path_ms": 10102.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "summary keys [] != ['changed', 'ok', 'total_memory_mi']",
+            "summary[total_memory_mi] is None, want 5120",
+            "summary[ok] is None, want True",
+            "summary[changed] is None, want ['services/api.yaml']"
+          ],
+          "n_steps": 6,
+          "run_id": "single_cheap::summary_schema::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "summary_schema",
+          "tokens_cached_in": 24300,
+          "tokens_in": 25397,
+          "tokens_out": 1421,
+          "usd": 0.0009210999999999999,
+          "usd_by_tier": {
+            "cheap": 0.0009210999999999999
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 5,
+          "config": "single_cheap",
+          "critical_path_ms": 7825.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:memory_mi is '1024', want '1080'"
+          ],
+          "n_steps": 5,
+          "run_id": "single_cheap::effective_footprint::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "effective_footprint",
+          "tokens_cached_in": 20250,
+          "tokens_in": 21042,
+          "tokens_out": 1745,
+          "usd": 0.0009797,
+          "usd_by_tier": {
+            "cheap": 0.0009797
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 9,
+          "config": "single_cheap",
+          "critical_path_ms": 14174.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 9,
+          "run_id": "single_cheap::halve_large_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "halve_large_memory",
+          "tokens_cached_in": 36450,
+          "tokens_in": 38593,
+          "tokens_out": 2799,
+          "usd": 0.0016983999999999999,
+          "usd_by_tier": {
+            "cheap": 0.0016983999999999999
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 2,
+          "config": "single_cheap",
+          "critical_path_ms": 4296.4,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:replicas is '4', want '10'",
+            "services/worker.yaml:memory_mi is '1024', want '1232'",
+            "summary keys [] != ['total_footprint_mi', 'worker_memory_mi', 'worker_replicas']",
+            "summary[worker_replicas] is None, want 10",
+            "summary[worker_memory_mi] is None, want 1232",
+            "summary[total_footprint_mi] is None, want 20000"
+          ],
+          "n_steps": 2,
+          "run_id": "single_cheap::cap_and_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "cap_and_report",
+          "tokens_cached_in": 8100,
+          "tokens_in": 8371,
+          "tokens_out": 619,
+          "usd": 0.0003557,
+          "usd_by_tier": {
+            "cheap": 0.0003557
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_cheap",
+          "critical_path_ms": 7984.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_cheap::ignore_the_runbook::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "ignore_the_runbook",
+          "tokens_cached_in": 28350,
+          "tokens_in": 29624,
+          "tokens_out": 1419,
+          "usd": 0.0009785,
+          "usd_by_tier": {
+            "cheap": 0.0009785
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_cheap",
+          "critical_path_ms": 12914.6,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_cheap::already_compliant::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "already_compliant",
+          "tokens_cached_in": 28350,
+          "tokens_in": 30016,
+          "tokens_out": 3166,
+          "usd": 0.0017165,
+          "usd_by_tier": {
+            "cheap": 0.0017165
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 5,
+          "config": "single_cheap",
+          "critical_path_ms": 7751.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_cheap::order_dependent_edits::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "order_dependent_edits",
+          "tokens_cached_in": 20250,
+          "tokens_in": 21013,
+          "tokens_out": 1853,
+          "usd": 0.00102,
+          "usd_by_tier": {
+            "cheap": 0.00102
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_cheap",
+          "critical_path_ms": 10779.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "summary keys [] != ['new_footprint_mi', 'old_footprint_mi', 'service']",
+            "summary[service] is None, want 'api'",
+            "summary[old_footprint_mi] is None, want 1024",
+            "summary[new_footprint_mi] is None, want 5120"
+          ],
+          "n_steps": 7,
+          "run_id": "single_cheap::smallest_footprint_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "smallest_footprint_report",
+          "tokens_cached_in": 28350,
+          "tokens_in": 29985,
+          "tokens_out": 1842,
+          "usd": 0.0011838,
+          "usd_by_tier": {
+            "cheap": 0.0011838
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 8,
+          "config": "single_cheap",
+          "critical_path_ms": 13632.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 8,
+          "run_id": "single_cheap::mean_footprint_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "mean_footprint_cpu",
+          "tokens_cached_in": 32400,
+          "tokens_in": 34190,
+          "tokens_out": 2600,
+          "usd": 0.001543,
+          "usd_by_tier": {
+            "cheap": 0.001543
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 4,
+          "config": "single_cheap",
+          "critical_path_ms": 6651.9,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_cheap::two_constraints::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_constraints",
+          "tokens_cached_in": 16200,
+          "tokens_in": 16770,
+          "tokens_out": 1544,
+          "usd": 0.0008366000000000001,
+          "usd_by_tier": {
+            "cheap": 0.0008366000000000001
+          }
+        }
+      ],
+      "solved": 15,
+      "solved_by_band": {
+        "easy": [
+          4,
+          4
+        ],
+        "hard": [
+          6,
+          10
+        ],
+        "medium": [
+          5,
+          6
+        ]
+      },
+      "success_delta_vs_baseline": -0.2,
+      "success_rate": 0.75,
+      "tokens_cached_in": 356400,
+      "tokens_in": 375020,
+      "tokens_out": 23535,
+      "usd_by_tier": {
+        "cheap": 0.014839999999999999
+      },
+      "usd_per_solved_task": 0.0009893333333333334,
+      "usd_per_solved_vs_baseline": 0.1145,
+      "usd_per_task": 0.000742,
+      "usd_total": 0.01484
+    },
+    {
+      "cache": {
+        "cached_tokens_served": 376650,
+        "create_failures": 0,
+        "creates": 1,
+        "hit_rate": 0.9894,
+        "hits": 93,
+        "last_create_error": null,
+        "lookups": 94,
+        "misses": 1,
+        "skipped_too_small": 0,
+        "storage_token_hours": 1012.5,
+        "uncached_prefix_tokens_paid": 3628,
+        "usd_net_saving": 0.10068299999999984,
+        "usd_saved_on_reads": 0.10169549999999984,
+        "usd_storage": 0.0010125
+      },
+      "calls": 94,
+      "config": {
+        "cache_enabled": true,
+        "confidence_threshold": 0.75,
+        "layout": "cache_aware",
+        "learned_threshold": 0.5,
+        "max_steps": 10,
+        "name": "single_mid",
+        "policy": "none",
+        "prefetch_enabled": false,
+        "run_cap_usd": null,
+        "tiers": [
+          "mid"
+        ],
+        "tool_latency_ms": 0.0
+      },
+      "escalations": 0,
+      "mean_ms": 6710.1,
+      "n_tasks": 20,
+      "p50_ms": 6901.8,
+      "p95_ms": 13283.9,
+      "policy": {
+        "decisions": 0,
+        "escalation_rate": 0.0,
+        "escalations": 0,
+        "latency_overhead_ms": 0.0,
+        "overhead_calls": 0,
+        "usd_overhead": 0.0
+      },
+      "prefetch": {
+        "considered": 0,
+        "coverage": 0.0,
+        "hit_rate": 0.0,
+        "hits": 0,
+        "launched": 0,
+        "misses": 0,
+        "ms_saved": 0.0,
+        "ms_wasted": 0.0,
+        "skipped_low_confidence": 0,
+        "skipped_no_prediction": 0,
+        "skipped_not_readonly": 0,
+        "usd_wasted": 0.0
+      },
+      "runs": [
+        {
+          "band": "easy",
+          "calls": 2,
+          "config": "single_mid",
+          "critical_path_ms": 2038.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 2,
+          "run_id": "single_mid::api_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "api_replicas",
+          "tokens_cached_in": 4050,
+          "tokens_in": 8179,
+          "tokens_out": 164,
+          "usd": 0.0017702,
+          "usd_by_tier": {
+            "mid": 0.0017702
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 2,
+          "config": "single_mid",
+          "critical_path_ms": 1836.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 2,
+          "run_id": "single_mid::web_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "web_cpu",
+          "tokens_cached_in": 8100,
+          "tokens_in": 8194,
+          "tokens_out": 190,
+          "usd": 0.0007462,
+          "usd_by_tier": {
+            "mid": 0.0007462
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 3,
+          "config": "single_mid",
+          "critical_path_ms": 4495.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_mid::named_service_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "named_service_memory",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12342,
+          "tokens_out": 249,
+          "usd": 0.0010446000000000001,
+          "usd_by_tier": {
+            "mid": 0.0010446000000000001
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 3,
+          "config": "single_mid",
+          "critical_path_ms": 2807.7,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_mid::policy_owner::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "policy_owner",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12374,
+          "tokens_out": 324,
+          "usd": 0.0012416999999999999,
+          "usd_by_tier": {
+            "mid": 0.0012416999999999999
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 6,
+          "config": "single_mid",
+          "critical_path_ms": 6901.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_mid::no_op_trap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "no_op_trap",
+          "tokens_cached_in": 24300,
+          "tokens_in": 25273,
+          "tokens_out": 852,
+          "usd": 0.0031509,
+          "usd_by_tier": {
+            "mid": 0.0031509
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 2,
+          "config": "single_mid",
+          "critical_path_ms": 3507.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 2,
+          "run_id": "single_mid::decoy_web_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "decoy_web_replicas",
+          "tokens_cached_in": 8100,
+          "tokens_in": 8213,
+          "tokens_out": 287,
+          "usd": 0.0009944,
+          "usd_by_tier": {
+            "mid": 0.0009944
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 3,
+          "config": "single_mid",
+          "critical_path_ms": 3013.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_mid::replica_cap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "replica_cap",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12395,
+          "tokens_out": 326,
+          "usd": 0.001253,
+          "usd_by_tier": {
+            "mid": 0.001253
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 3,
+          "config": "single_mid",
+          "critical_path_ms": 2758.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_mid::grep_then_edit::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "grep_then_edit",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12380,
+          "tokens_out": 292,
+          "usd": 0.0011635,
+          "usd_by_tier": {
+            "mid": 0.0011635
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 3,
+          "config": "single_mid",
+          "critical_path_ms": 2989.6,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_mid::two_edits_one_file::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_edits_one_file",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12388,
+          "tokens_out": 272,
+          "usd": 0.0011159,
+          "usd_by_tier": {
+            "mid": 0.0011159
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_mid",
+          "critical_path_ms": 5460.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_mid::cpu_consistency::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "cpu_consistency",
+          "tokens_cached_in": 20250,
+          "tokens_in": 20903,
+          "tokens_out": 642,
+          "usd": 0.0024083999999999998,
+          "usd_by_tier": {
+            "mid": 0.0024083999999999998
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_mid",
+          "critical_path_ms": 8707.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_mid::summary_schema::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "summary_schema",
+          "tokens_cached_in": 24300,
+          "tokens_in": 25397,
+          "tokens_out": 1247,
+          "usd": 0.0041756,
+          "usd_by_tier": {
+            "mid": 0.0041756
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_mid",
+          "critical_path_ms": 11883.9,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_mid::effective_footprint::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "effective_footprint",
+          "tokens_cached_in": 28350,
+          "tokens_in": 29808,
+          "tokens_out": 1758,
+          "usd": 0.0056829,
+          "usd_by_tier": {
+            "mid": 0.0056829
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 10,
+          "config": "single_mid",
+          "critical_path_ms": 14192.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 10,
+          "run_id": "single_mid::halve_large_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "halve_large_memory",
+          "tokens_cached_in": 40500,
+          "tokens_in": 43121,
+          "tokens_out": 2141,
+          "usd": 0.0073538,
+          "usd_by_tier": {
+            "mid": 0.0073538
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 3,
+          "config": "single_mid",
+          "critical_path_ms": 7339.6,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:replicas is '4', want '10'",
+            "services/worker.yaml:memory_mi is '1024', want '1232'",
+            "summary keys [] != ['total_footprint_mi', 'worker_memory_mi', 'worker_replicas']",
+            "summary[worker_replicas] is None, want 10",
+            "summary[worker_memory_mi] is None, want 1232",
+            "summary[total_footprint_mi] is None, want 20000"
+          ],
+          "n_steps": 3,
+          "run_id": "single_mid::cap_and_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "cap_and_report",
+          "tokens_cached_in": 12150,
+          "tokens_in": 12635,
+          "tokens_out": 1448,
+          "usd": 0.00413,
+          "usd_by_tier": {
+            "mid": 0.00413
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_mid",
+          "critical_path_ms": 8181.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_mid::ignore_the_runbook::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "ignore_the_runbook",
+          "tokens_cached_in": 28350,
+          "tokens_in": 29624,
+          "tokens_out": 972,
+          "usd": 0.0036627,
+          "usd_by_tier": {
+            "mid": 0.0036627
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_mid",
+          "critical_path_ms": 10034.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_mid::already_compliant::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "already_compliant",
+          "tokens_cached_in": 24300,
+          "tokens_in": 25573,
+          "tokens_out": 1618,
+          "usd": 0.0051559,
+          "usd_by_tier": {
+            "mid": 0.0051559
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 5,
+          "config": "single_mid",
+          "critical_path_ms": 8124.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_mid::order_dependent_edits::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "order_dependent_edits",
+          "tokens_cached_in": 20250,
+          "tokens_in": 21013,
+          "tokens_out": 1311,
+          "usd": 0.0041139,
+          "usd_by_tier": {
+            "mid": 0.0041139
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_mid",
+          "critical_path_ms": 13283.9,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "summary keys [] != ['new_footprint_mi', 'old_footprint_mi', 'service']",
+            "summary[service] is None, want 'api'",
+            "summary[old_footprint_mi] is None, want 1024",
+            "summary[new_footprint_mi] is None, want 5120"
+          ],
+          "n_steps": 7,
+          "run_id": "single_mid::smallest_footprint_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "smallest_footprint_report",
+          "tokens_cached_in": 28350,
+          "tokens_in": 29985,
+          "tokens_out": 1513,
+          "usd": 0.0051235000000000004,
+          "usd_by_tier": {
+            "mid": 0.0051235000000000004
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_mid",
+          "critical_path_ms": 10127.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:cpu_m is '750', want '400'"
+          ],
+          "n_steps": 7,
+          "run_id": "single_mid::mean_footprint_cpu::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "mean_footprint_cpu",
+          "tokens_cached_in": 28350,
+          "tokens_in": 29750,
+          "tokens_out": 1120,
+          "usd": 0.0040704999999999995,
+          "usd_by_tier": {
+            "mid": 0.0040704999999999995
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 4,
+          "config": "single_mid",
+          "critical_path_ms": 6519.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_mid::two_constraints::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_constraints",
+          "tokens_cached_in": 16200,
+          "tokens_in": 16770,
+          "tokens_out": 887,
+          "usd": 0.0028745,
+          "usd_by_tier": {
+            "mid": 0.0028745
+          }
+        }
+      ],
+      "solved": 17,
+      "solved_by_band": {
+        "easy": [
+          4,
+          4
+        ],
+        "hard": [
+          7,
+          10
+        ],
+        "medium": [
+          6,
+          6
+        ]
+      },
+      "success_delta_vs_baseline": -0.1,
+      "success_rate": 0.85,
+      "tokens_cached_in": 376650,
+      "tokens_in": 396317,
+      "tokens_out": 17613,
+      "usd_by_tier": {
+        "mid": 0.061232100000000005
+      },
+      "usd_per_solved_task": 0.0036018882352941177,
+      "usd_per_solved_vs_baseline": 0.4168,
+      "usd_per_task": 0.003061605,
+      "usd_total": 0.0612321
+    },
+    {
+      "cache": {
+        "cached_tokens_served": 545832,
+        "create_failures": 0,
+        "creates": 1,
+        "hit_rate": 0.9925,
+        "hits": 133,
+        "last_create_error": null,
+        "lookups": 134,
+        "misses": 1,
+        "skipped_too_small": 0,
+        "storage_token_hours": 1026.0,
+        "uncached_prefix_tokens_paid": 3628,
+        "usd_net_saving": 0.14634864000000003,
+        "usd_saved_on_reads": 0.14737464000000003,
+        "usd_storage": 0.001026
+      },
+      "calls": 134,
+      "config": {
+        "cache_enabled": true,
+        "confidence_threshold": 0.75,
+        "layout": "cache_aware",
+        "learned_threshold": 0.5,
+        "max_steps": 10,
+        "name": "single_mid2",
+        "policy": "none",
+        "prefetch_enabled": false,
+        "run_cap_usd": null,
+        "tiers": [
+          "mid2"
+        ],
+        "tool_latency_ms": 0.0
+      },
+      "escalations": 0,
+      "mean_ms": 5558.8,
+      "n_tasks": 20,
+      "p50_ms": 4544.6,
+      "p95_ms": 10170.3,
+      "policy": {
+        "decisions": 0,
+        "escalation_rate": 0.0,
+        "escalations": 0,
+        "latency_overhead_ms": 0.0,
+        "overhead_calls": 0,
+        "usd_overhead": 0.0
+      },
+      "prefetch": {
+        "considered": 0,
+        "coverage": 0.0,
+        "hit_rate": 0.0,
+        "hits": 0,
+        "launched": 0,
+        "misses": 0,
+        "ms_saved": 0.0,
+        "ms_wasted": 0.0,
+        "skipped_low_confidence": 0,
+        "skipped_no_prediction": 0,
+        "skipped_not_readonly": 0,
+        "usd_wasted": 0.0
+      },
+      "runs": [
+        {
+          "band": "easy",
+          "calls": 3,
+          "config": "single_mid2",
+          "critical_path_ms": 2425.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_mid2::api_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "api_replicas",
+          "tokens_cached_in": 8208,
+          "tokens_in": 12497,
+          "tokens_out": 71,
+          "usd": 0.00171044,
+          "usd_by_tier": {
+            "mid2": 0.00171044
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 4,
+          "config": "single_mid2",
+          "critical_path_ms": 3244.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_mid2::web_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "web_cpu",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16795,
+          "tokens_out": 94,
+          "usd": 0.00084118,
+          "usd_by_tier": {
+            "mid2": 0.00084118
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 5,
+          "config": "single_mid2",
+          "critical_path_ms": 3622.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_mid2::named_service_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "named_service_memory",
+          "tokens_cached_in": 20520,
+          "tokens_in": 21156,
+          "tokens_out": 104,
+          "usd": 0.0010664,
+          "usd_by_tier": {
+            "mid2": 0.0010664
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 4,
+          "config": "single_mid2",
+          "critical_path_ms": 3030.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_mid2::policy_owner::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "policy_owner",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16891,
+          "tokens_out": 99,
+          "usd": 0.00088248,
+          "usd_by_tier": {
+            "mid2": 0.00088248
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 6,
+          "config": "single_mid2",
+          "critical_path_ms": 4507.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_mid2::no_op_trap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "no_op_trap",
+          "tokens_cached_in": 24624,
+          "tokens_in": 25597,
+          "tokens_out": 108,
+          "usd": 0.00130062,
+          "usd_by_tier": {
+            "mid2": 0.00130062
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 4,
+          "config": "single_mid2",
+          "critical_path_ms": 2948.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_mid2::decoy_web_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "decoy_web_replicas",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16833,
+          "tokens_out": 91,
+          "usd": 0.0008450799999999999,
+          "usd_by_tier": {
+            "mid2": 0.0008450799999999999
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_mid2",
+          "critical_path_ms": 3800.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_mid2::replica_cap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "replica_cap",
+          "tokens_cached_in": 20520,
+          "tokens_in": 21176,
+          "tokens_out": 112,
+          "usd": 0.0010923999999999999,
+          "usd_by_tier": {
+            "mid2": 0.0010923999999999999
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 8,
+          "config": "single_mid2",
+          "critical_path_ms": 6393.7,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 8,
+          "run_id": "single_mid2::grep_then_edit::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "grep_then_edit",
+          "tokens_cached_in": 32832,
+          "tokens_in": 34471,
+          "tokens_out": 164,
+          "usd": 0.0018866599999999999,
+          "usd_by_tier": {
+            "mid2": 0.0018866599999999999
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_mid2",
+          "critical_path_ms": 4191.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_mid2::two_edits_one_file::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_edits_one_file",
+          "tokens_cached_in": 20520,
+          "tokens_in": 21151,
+          "tokens_out": 130,
+          "usd": 0.0011298999999999999,
+          "usd_by_tier": {
+            "mid2": 0.0011298999999999999
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_mid2",
+          "critical_path_ms": 3969.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_mid2::cpu_consistency::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "cpu_consistency",
+          "tokens_cached_in": 20520,
+          "tokens_in": 21173,
+          "tokens_out": 130,
+          "usd": 0.0011365,
+          "usd_by_tier": {
+            "mid2": 0.0011365
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 8,
+          "config": "single_mid2",
+          "critical_path_ms": 7594.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 8,
+          "run_id": "single_mid2::summary_schema::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "summary_schema",
+          "tokens_cached_in": 32832,
+          "tokens_in": 34685,
+          "tokens_out": 188,
+          "usd": 0.0020108599999999997,
+          "usd_by_tier": {
+            "mid2": 0.0020108599999999997
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 10,
+          "config": "single_mid2",
+          "critical_path_ms": 10170.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:memory_mi is '1045', want '1080'"
+          ],
+          "n_steps": 10,
+          "run_id": "single_mid2::effective_footprint::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "effective_footprint",
+          "tokens_cached_in": 41040,
+          "tokens_in": 43900,
+          "tokens_out": 207,
+          "usd": 0.0026067,
+          "usd_by_tier": {
+            "mid2": 0.0026067
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 10,
+          "config": "single_mid2",
+          "critical_path_ms": 8871.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 10,
+          "run_id": "single_mid2::halve_large_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "halve_large_memory",
+          "tokens_cached_in": 41040,
+          "tokens_in": 43659,
+          "tokens_out": 237,
+          "usd": 0.0026094,
+          "usd_by_tier": {
+            "mid2": 0.0026094
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 10,
+          "config": "single_mid2",
+          "critical_path_ms": 10247.4,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:memory_mi is '1152', want '1232'",
+            "no summary produced"
+          ],
+          "n_steps": 10,
+          "run_id": "single_mid2::cap_and_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "cap_and_report",
+          "tokens_cached_in": 41040,
+          "tokens_in": 44340,
+          "tokens_out": 231,
+          "usd": 0.0027986999999999995,
+          "usd_by_tier": {
+            "mid2": 0.0027986999999999995
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 9,
+          "config": "single_mid2",
+          "critical_path_ms": 6998.6,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 9,
+          "run_id": "single_mid2::ignore_the_runbook::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "ignore_the_runbook",
+          "tokens_cached_in": 36936,
+          "tokens_in": 38992,
+          "tokens_out": 181,
+          "usd": 0.00217738,
+          "usd_by_tier": {
+            "mid2": 0.00217738
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_mid2",
+          "critical_path_ms": 4467.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_mid2::already_compliant::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "already_compliant",
+          "tokens_cached_in": 24624,
+          "tokens_in": 25898,
+          "tokens_out": 118,
+          "usd": 0.00141592,
+          "usd_by_tier": {
+            "mid2": 0.00141592
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_mid2",
+          "critical_path_ms": 5493.4,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_mid2::order_dependent_edits::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "order_dependent_edits",
+          "tokens_cached_in": 28728,
+          "tokens_in": 30126,
+          "tokens_out": 170,
+          "usd": 0.00170624,
+          "usd_by_tier": {
+            "mid2": 0.00170624
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 9,
+          "config": "single_mid2",
+          "critical_path_ms": 7081.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/api.yaml:replicas is '2', want '10'",
+            "services/cache.yaml:replicas changed from '1' to '10'",
+            "summary[service] is 'cache', want 'api'",
+            "summary[old_footprint_mi] is 2048, want 1024",
+            "summary[new_footprint_mi] is 20480, want 5120"
+          ],
+          "n_steps": 9,
+          "run_id": "single_mid2::smallest_footprint_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "smallest_footprint_report",
+          "tokens_cached_in": 36936,
+          "tokens_in": 39473,
+          "tokens_out": 216,
+          "usd": 0.00240918,
+          "usd_by_tier": {
+            "mid2": 0.00240918
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 10,
+          "config": "single_mid2",
+          "critical_path_ms": 7576.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/web.yaml:cpu_m is '500', want '400'",
+            "services/worker.yaml:cpu_m is '750', want '400'",
+            "services/cache.yaml:cpu_m changed from '250' to '400'"
+          ],
+          "n_steps": 10,
+          "run_id": "single_mid2::mean_footprint_cpu::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "mean_footprint_cpu",
+          "tokens_cached_in": 41040,
+          "tokens_in": 43814,
+          "tokens_out": 204,
+          "usd": 0.0025733999999999996,
+          "usd_by_tier": {
+            "mid2": 0.0025733999999999996
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_mid2",
+          "critical_path_ms": 4544.6,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_mid2::two_constraints::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_constraints",
+          "tokens_cached_in": 24624,
+          "tokens_in": 25773,
+          "tokens_out": 148,
+          "usd": 0.00145342,
+          "usd_by_tier": {
+            "mid2": 0.00145342
+          }
+        }
+      ],
+      "solved": 16,
+      "solved_by_band": {
+        "easy": [
+          4,
+          4
+        ],
+        "hard": [
+          6,
+          10
+        ],
+        "medium": [
+          6,
+          6
+        ]
+      },
+      "success_delta_vs_baseline": -0.15,
+      "success_rate": 0.8,
+      "tokens_cached_in": 545832,
+      "tokens_in": 578400,
+      "tokens_out": 3003,
+      "usd_by_tier": {
+        "mid2": 0.03365285999999999
+      },
+      "usd_per_solved_task": 0.00210330375,
+      "usd_per_solved_vs_baseline": 0.2434,
+      "usd_per_task": 0.001682643,
+      "usd_total": 0.03365286
+    },
+    {
+      "cache": {
+        "cached_tokens_served": 414504,
+        "create_failures": 0,
+        "creates": 1,
+        "hit_rate": 0.9902,
+        "hits": 101,
+        "last_create_error": null,
+        "lookups": 102,
+        "misses": 1,
+        "skipped_too_small": 0,
+        "storage_token_hours": 1026.0,
+        "uncached_prefix_tokens_paid": 3628,
+        "usd_net_saving": 0.2787642,
+        "usd_saved_on_reads": 0.27979020000000004,
+        "usd_storage": 0.001026
+      },
+      "calls": 102,
+      "config": {
+        "cache_enabled": true,
+        "confidence_threshold": 0.75,
+        "layout": "cache_aware",
+        "learned_threshold": 0.5,
+        "max_steps": 10,
+        "name": "single_strong",
+        "policy": "none",
+        "prefetch_enabled": false,
+        "run_cap_usd": null,
+        "tiers": [
+          "strong"
+        ],
+        "tool_latency_ms": 0.0
+      },
+      "escalations": 0,
+      "mean_ms": 11437.8,
+      "n_tasks": 20,
+      "p50_ms": 10637.8,
+      "p95_ms": 19857.0,
+      "policy": {
+        "decisions": 0,
+        "escalation_rate": 0.0,
+        "escalations": 0,
+        "latency_overhead_ms": 0.0,
+        "overhead_calls": 0,
+        "usd_overhead": 0.0
+      },
+      "prefetch": {
+        "considered": 0,
+        "coverage": 0.0,
+        "hit_rate": 0.0,
+        "hits": 0,
+        "launched": 0,
+        "misses": 0,
+        "ms_saved": 0.0,
+        "ms_wasted": 0.0,
+        "skipped_low_confidence": 0,
+        "skipped_no_prediction": 0,
+        "skipped_not_readonly": 0,
+        "usd_wasted": 0.0
+      },
+      "runs": [
+        {
+          "band": "easy",
+          "calls": 3,
+          "config": "single_strong",
+          "critical_path_ms": 4905.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_strong::api_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "api_replicas",
+          "tokens_cached_in": 8208,
+          "tokens_in": 12504,
+          "tokens_out": 517,
+          "usd": 0.0057763499999999995,
+          "usd_by_tier": {
+            "strong": 0.0057763499999999995
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 3,
+          "config": "single_strong",
+          "critical_path_ms": 4467.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "single_strong::web_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "web_cpu",
+          "tokens_cached_in": 12312,
+          "tokens_in": 12525,
+          "tokens_out": 512,
+          "usd": 0.0030031499999999996,
+          "usd_by_tier": {
+            "strong": 0.0030031499999999996
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 4,
+          "config": "single_strong",
+          "critical_path_ms": 6402.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_strong::named_service_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "named_service_memory",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16822,
+          "tokens_out": 680,
+          "usd": 0.004085699999999999,
+          "usd_by_tier": {
+            "strong": 0.004085699999999999
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 4,
+          "config": "single_strong",
+          "critical_path_ms": 7897.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_strong::policy_owner::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "policy_owner",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16891,
+          "tokens_out": 1023,
+          "usd": 0.0054237,
+          "usd_by_tier": {
+            "strong": 0.0054237
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_strong",
+          "critical_path_ms": 8387.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_strong::no_op_trap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "no_op_trap",
+          "tokens_cached_in": 20520,
+          "tokens_in": 21202,
+          "tokens_out": 931,
+          "usd": 0.00554175,
+          "usd_by_tier": {
+            "strong": 0.00554175
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 4,
+          "config": "single_strong",
+          "critical_path_ms": 6601.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_strong::decoy_web_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "decoy_web_replicas",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16833,
+          "tokens_out": 772,
+          "usd": 0.00443895,
+          "usd_by_tier": {
+            "strong": 0.00443895
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_strong",
+          "critical_path_ms": 8821.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_strong::replica_cap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "replica_cap",
+          "tokens_cached_in": 20520,
+          "tokens_in": 21176,
+          "tokens_out": 1052,
+          "usd": 0.005975999999999999,
+          "usd_by_tier": {
+            "strong": 0.005975999999999999
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "single_strong",
+          "critical_path_ms": 9053.7,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "single_strong::grep_then_edit::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "grep_then_edit",
+          "tokens_cached_in": 20520,
+          "tokens_in": 21115,
+          "tokens_out": 1016,
+          "usd": 0.00579525,
+          "usd_by_tier": {
+            "strong": 0.00579525
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 4,
+          "config": "single_strong",
+          "critical_path_ms": 6815.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_strong::two_edits_one_file::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_edits_one_file",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16827,
+          "tokens_out": 820,
+          "usd": 0.004614449999999999,
+          "usd_by_tier": {
+            "strong": 0.004614449999999999
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 4,
+          "config": "single_strong",
+          "critical_path_ms": 10291.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_strong::cpu_consistency::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "cpu_consistency",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16844,
+          "tokens_out": 1644,
+          "usd": 0.0077172000000000004,
+          "usd_by_tier": {
+            "strong": 0.0077172000000000004
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_strong",
+          "critical_path_ms": 15204.7,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_strong::summary_schema::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "summary_schema",
+          "tokens_cached_in": 24624,
+          "tokens_in": 25752,
+          "tokens_out": 2320,
+          "usd": 0.011392800000000002,
+          "usd_by_tier": {
+            "strong": 0.011392800000000002
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_strong",
+          "critical_path_ms": 19857.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_strong::effective_footprint::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "effective_footprint",
+          "tokens_cached_in": 28728,
+          "tokens_in": 30174,
+          "tokens_out": 3006,
+          "usd": 0.0145116,
+          "usd_by_tier": {
+            "strong": 0.0145116
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 8,
+          "config": "single_strong",
+          "critical_path_ms": 22852.3,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 8,
+          "run_id": "single_strong::halve_large_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "halve_large_memory",
+          "tokens_cached_in": 32832,
+          "tokens_in": 34530,
+          "tokens_out": 3417,
+          "usd": 0.016549650000000003,
+          "usd_by_tier": {
+            "strong": 0.016549650000000003
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_strong",
+          "critical_path_ms": 17125.0,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [
+            "services/worker.yaml:replicas is '4', want '10'",
+            "services/worker.yaml:memory_mi is '1024', want '1232'",
+            "summary keys [] != ['total_footprint_mi', 'worker_memory_mi', 'worker_replicas']",
+            "summary[worker_replicas] is None, want 10",
+            "summary[worker_memory_mi] is None, want 1232",
+            "summary[total_footprint_mi] is None, want 20000"
+          ],
+          "n_steps": 6,
+          "run_id": "single_strong::cap_and_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "cap_and_report",
+          "tokens_cached_in": 24624,
+          "tokens_in": 26035,
+          "tokens_out": 2587,
+          "usd": 0.0126063,
+          "usd_by_tier": {
+            "strong": 0.0126063
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 4,
+          "config": "single_strong",
+          "critical_path_ms": 13014.5,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_strong::ignore_the_runbook::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "ignore_the_runbook",
+          "tokens_cached_in": 16416,
+          "tokens_in": 17083,
+          "tokens_out": 1151,
+          "usd": 0.0060477,
+          "usd_by_tier": {
+            "strong": 0.0060477
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_strong",
+          "critical_path_ms": 12045.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_strong::already_compliant::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "already_compliant",
+          "tokens_cached_in": 24624,
+          "tokens_in": 25897,
+          "tokens_out": 1608,
+          "usd": 0.00883155,
+          "usd_by_tier": {
+            "strong": 0.00883155
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 4,
+          "config": "single_strong",
+          "critical_path_ms": 10637.8,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "single_strong::order_dependent_edits::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "order_dependent_edits",
+          "tokens_cached_in": 16416,
+          "tokens_in": 16930,
+          "tokens_out": 1680,
+          "usd": 0.0079167,
+          "usd_by_tier": {
+            "strong": 0.0079167
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_strong",
+          "critical_path_ms": 14182.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_strong::smallest_footprint_report::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "smallest_footprint_report",
+          "tokens_cached_in": 28728,
+          "tokens_in": 30363,
+          "tokens_out": 2192,
+          "usd": 0.011600850000000001,
+          "usd_by_tier": {
+            "strong": 0.011600850000000001
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 7,
+          "config": "single_strong",
+          "critical_path_ms": 17739.1,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "single_strong::mean_footprint_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "mean_footprint_cpu",
+          "tokens_cached_in": 28728,
+          "tokens_in": 30113,
+          "tokens_out": 2554,
+          "usd": 0.01277085,
+          "usd_by_tier": {
+            "strong": 0.01277085
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 6,
+          "config": "single_strong",
+          "critical_path_ms": 12456.2,
+          "degradations": [],
+          "escalations": 0,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "single_strong::two_constraints::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_constraints",
+          "tokens_cached_in": 24624,
+          "tokens_in": 25773,
+          "tokens_out": 1836,
+          "usd": 0.00959355,
+          "usd_by_tier": {
+            "strong": 0.00959355
+          }
+        }
+      ],
+      "solved": 19,
+      "solved_by_band": {
+        "easy": [
+          4,
+          4
+        ],
+        "hard": [
+          9,
+          10
+        ],
+        "medium": [
+          6,
+          6
+        ]
+      },
+      "success_delta_vs_baseline": 0.0,
+      "success_rate": 0.95,
+      "tokens_cached_in": 414504,
+      "tokens_in": 435389,
+      "tokens_out": 31318,
+      "usd_by_tier": {
+        "strong": 0.16419405
+      },
+      "usd_per_solved_task": 0.008641792105263158,
+      "usd_per_solved_vs_baseline": 1.0,
+      "usd_per_task": 0.0082097025,
+      "usd_total": 0.16419405
+    }
+  ],
+  "notes": {
+    "cache_enabled": true,
+    "cache_ttl_seconds": 900,
+    "configs_completed": 4,
+    "configs_requested": 4,
+    "prefetch": false,
+    "seed": 0,
+    "tool_latency_ms": 0.0
+  },
+  "pareto_front": [
+    "single_cheap",
+    "single_mid",
+    "single_mid2",
+    "single_strong"
+  ],
+  "price_table_date": "2026-09-25",
+  "suite": "benchmarks/suite.yaml",
+  "tiers": {
+    "cheap": {
+      "model": "gemini-2.5-flash-lite",
+      "usd_per_mtok_cached_in": 0.01,
+      "usd_per_mtok_in": 0.1,
+      "usd_per_mtok_out": 0.4
+    },
+    "mid": {
+      "model": "gemini-2.5-flash",
+      "usd_per_mtok_cached_in": 0.03,
+      "usd_per_mtok_in": 0.3,
+      "usd_per_mtok_out": 2.5
+    },
+    "mid2": {
+      "model": "gemini-3.5-flash-lite",
+      "usd_per_mtok_cached_in": 0.03,
+      "usd_per_mtok_in": 0.3,
+      "usd_per_mtok_out": 2.5
+    },
+    "strong": {
+      "model": "gemini-3.6-flash",
+      "usd_per_mtok_cached_in": 0.075,
+      "usd_per_mtok_in": 0.75,
+      "usd_per_mtok_out": 3.75
+    }
+  },
+  "verifier_tier": "mid"
+}

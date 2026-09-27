@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from arouter.bench import BenchOptions, SimulatedFactory, run_config
@@ -80,3 +82,20 @@ def test_replayed_token_counts_are_the_recorded_ones(suite: Suite, tmp_path) -> 
     assert replayed.spend.tokens_in == run.spend.tokens_in
     assert replayed.spend.tokens_out == run.spend.tokens_out
     assert replayed.usd == pytest.approx(run.usd)
+
+
+REAL_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "real" / "frontier"
+
+
+@pytest.mark.skipif(not REAL_FIXTURES.exists(), reason="committed real fixtures are absent")
+def test_the_committed_real_run_replays_to_its_published_numbers(suite: Suite) -> None:
+    """The real-model rows in MEASUREMENTS.md must be reproducible with no credentials."""
+    index = FixtureIndex.load(REAL_FIXTURES)
+    config = RunConfig(name="single_cheap", tiers=("cheap",), policy="none", max_steps=10)
+    result = run_config(
+        suite, config, BenchOptions(seed=0, cache_backend=LocalCacheBackend(), factory=ReplayFactory(index=index))
+    )
+    assert result.solved == 15
+    assert result.n == 20
+    assert result.usd_per_solved_task == pytest.approx(0.00099, abs=5e-6)
+    assert result.cache.hit_rate > 0.95

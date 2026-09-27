@@ -25,22 +25,23 @@ reaches its cap walks down a degradation ladder instead of crashing or truncatin
 
 ## The numbers
 
-Simulated, 20 tasks, against a single-strong-model baseline of `gemini-3.6-flash` that
-solved 17 of 20 at 0.00450 USD per solved task, p50 8282 ms, p95 13274 ms.
+Real Vertex AI, 20 tasks, against a single-strong-model baseline of `gemini-3.6-flash` that
+solved 19 of 20 (95%) at 0.00864 USD per solved task, p50 10638 ms, p95 19857 ms. The
+headline result: a learned escalation policy, fitted on simulated shadow data and never
+retrained on a real model, matches that 19-of-20 success rate at 0.00351 USD per solved
+task, 0.41x the baseline's cost. An oracle that escalates exactly when the cheap step is
+wrong solves 18 of 20 (90%) at 0.62x, worse on both axes than the learned policy, because
+some failures survive a perfect escalation decision. A paid verifier model solves 17 of 20
+(85%) at 0.44x; free structural validation alone also solves 17 of 20 at 0.22x, which is
+why dollars per solved task is never reported without the success rate next to it.
 
-The learned policy solved the same 17 of 20 at 0.00275 USD per solved task, 0.61x the
-baseline, with p50 down 18%. The oracle reached 0.54x, so the learned policy captures about
-83% of the available headroom. The verifier model was worse on both axes at once, 1.19x the
-cost for 4 fewer tasks solved, because a paid verifier has to beat a free structural check by
-more than its own price. Free structural validation alone reached 0.62x per solved task while
-solving 7 tasks instead of 17, which is the result that looks like a win until the success
-column sits next to it.
-
-Caching the stable prefix cut spend 81%, from 0.02053 to 0.00388 USD. The naive layout still
-hit 84.6% but needed 8 caches instead of 1 and spent 59% more for the same tokens.
-Speculative prefetch saved wall clock at every tool latency tested and went net negative only
-once the tool itself cost money and was fast: at 0.002 USD per call the crossing sits between
-60 and 200 ms of tool latency.
+Caching the stable prefix cut real spend 59%, from 0.03607 to 0.01486 USD, at a 98.9% hit
+rate. A deliberately naive layout that lets a step counter into the prefix still hit 90.3%
+but needed 9 caches instead of 1 and spent 21% more for fewer served tokens. Speculative
+prefetch, replayed against real recorded tool-call sequences, hit 57 to 72% (below the
+93 to 100% a simulated stub gives, because two real models take different routes through
+the same task) and still paid off at every latency tested once the tool itself is free;
+the simulated finding that a fast, billed tool is where you should not speculate stands.
 
 Full tables, the real-model runs with model ids and dates, and what the first real run
 changed about the benchmark are in `MEASUREMENTS.md`. `NOTES.md` is the build log.

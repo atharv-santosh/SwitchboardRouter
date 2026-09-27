@@ -25,14 +25,25 @@ arouter prefetch-study --out out/prefetch-study.json
 arouter budget-demo --out out/budget-demo.json
 ```
 
+Reproduce the real-model numbers offline, with no credentials and no spend, from the
+committed fixtures:
+
+```
+arouter verify fixtures/real
+arouter merge fixtures/real/bench-singles.json fixtures/real/bench-cascade_*.json \
+  --out out/real-frontier.json --html out/real-frontier.html
+arouter prefetch-study --backend replay --fixtures fixtures/real/frontier \
+  --replay-config single_cheap --fit-on single_mid --out out/prefetch-real.json
+```
+
 ## Test suite
 
 ```
 $ pytest -q
-169 passed, 7 skipped in 3.80s
+189 passed, 7 skipped in 4.01s
 ```
 
-169 tests pass with no credentials present. The 7 skips are the live Vertex tests in
+189 tests pass with no credentials present. The 7 skips are the live Vertex tests in
 `tests/test_vertex.py`, which skip on a missing `GOOGLE_CLOUD_PROJECT`. `mypy src/arouter`
 reports "Success: no issues found in 21 source files".
 
@@ -282,3 +293,92 @@ well-formed call with the wrong number in it, or finishes early having done part
 `schema_invalid` therefore falls from first to fifth. Had I only run the simulation I would
 have concluded that free structural validation is most of what a cascade needs, and that
 conclusion would have been wrong.
+
+### Real frontier, all nine configs, 2026-09-26
+
+All 20 tasks, every configuration, against Vertex. `arouter verify fixtures/real` replays
+every trajectory below to matching token counts and spend; the table itself comes from
+`arouter merge fixtures/real/bench-singles.json fixtures/real/bench-cascade_*.json`, and the
+same numbers reproduce with `arouter bench --backend replay --fixtures fixtures/real/frontier
+--learned-fit fixtures/real/fit.json`.
+
+| config                      | solved | success | $/task  | $/solved | vs baseline | p50 ms | p95 ms | escalations |
+|-----------------------------|--------|---------|---------|----------|-------------|--------|--------|-------------|
+| single_cheap                | 15/20  | 75%     | 0.00074 | 0.00099  | 0.11x       | 6652   | 13632  | 0           |
+| cascade_schema_validation   | 17/20  | 85%     | 0.00159 | 0.00187  | 0.22x       | 6928   | 15255  | 4           |
+| single_mid2                 | 16/20  | 80%     | 0.00168 | 0.00210  | 0.24x       | 4545   | 10170  | 0           |
+| single_mid                  | 17/20  | 85%     | 0.00306 | 0.00360  | 0.42x       | 6902   | 13284  | 0           |
+| cascade_verifier_model      | 17/20  | 85%     | 0.00320 | 0.00376  | 0.44x       | 12549  | 25368  | 4           |
+| cascade_learned_threshold   | 19/20  | 95%     | 0.00333 | 0.00351  | 0.41x       | 9672   | 25556  | 27          |
+| cascade_oracle              | 18/20  | 90%     | 0.00486 | 0.00540  | 0.62x       | 12294  | 27486  | 51          |
+| cascade_self_confidence     | 18/20  | 90%     | 0.00734 | 0.00816  | 0.94x       | 15892  | 32215  | 84          |
+| single_strong (baseline)    | 19/20  | 95%     | 0.00821 | 0.00864  | 1.00x       | 10638  | 19857  | 0           |
+
+Pareto front: `single_cheap`, `cascade_schema_validation`, `cascade_learned_threshold`.
+`cascade_learned_threshold` matches the baseline's success rate exactly, 19 of 20, at 0.41x
+the cost per solved task, which is the headline number for this project: a policy fitted on
+485 simulated shadow steps and never retrained on real data still recovers the baseline's
+success rate at 41% of its cost against a live model it was not tuned on.
+
+`cascade_oracle` is not the ceiling here that it is in simulation. It escalates exactly when
+the cheap step disagrees with the strong one, but a task can still fail for reasons the
+escalation decision cannot fix: a wrong strong-model step, or the run exhausting
+`max_steps`. That is a real finding rather than a modelling artefact: an oracle over one
+decision is a ceiling on that decision, not on the task.
+
+`cascade_verifier_model` needed a genuine bug fix before it would replay at all. Its
+verifier factory was constructed with `run_id=f"{config.name}::"`, missing the task id and
+seed that every recorded run actually carries, so replaying it against the full fixture
+directory always missed the lookup. The fix threads the real run_id through
+`verifier_factory` from `CascadeRunner.run` down to every call site (`src/arouter/cascade.py`,
+`bench.py`, `cli.py`); nothing about the escalation logic changed, and the numbers above are
+what it already was.
+
+This was found while assembling this exact frontier, which is the point of replaying
+committed fixtures in CI rather than only trusting the numbers each fixture was recorded
+with.
+
+### Real speculative prefetch, 2026-09-26
+
+Replayed the recorded `single_cheap` trajectories under `fixtures/real/frontier` with real
+Vertex tool-call sequences: the predictor is fit on the recorded `single_mid` run and
+evaluated on `single_cheap`, so it never sees the run it predicts. Free tool, latency valued
+at 0.002 USD per second, launched out of 89 real tool calls:
+
+| tool latency | threshold | launched | hit rate | ms saved | ms wasted | net USD   | break-even |
+|--------------|-----------|----------|----------|----------|-----------|-----------|------------|
+| 40 ms        | 0.30      | 49       | 57.1%    | 1216     | 906       | -0.001767 | 71.4%      |
+| 40 ms        | 0.70      | 32       | 71.9%    | 999      | 386       | +0.000198 | 71.4%      |
+| 120 ms       | 0.30      | 49       | 57.1%    | 3443     | 2592      | +0.002686 | 45.5%      |
+| 120 ms       | 0.70      | 32       | 71.9%    | 2844     | 1112      | +0.003887 | 45.5%      |
+| 400 ms       | 0.30      | 49       | 57.1%    | 11307    | 8467      | +0.018414 | 20.0%      |
+| 400 ms       | 0.70      | 32       | 71.9%    | 9286     | 3626      | +0.016772 | 20.0%      |
+| 1200 ms      | 0.30      | 49       | 57.1%    | 31797    | 25287     | +0.059395 | 7.7%       |
+| 1200 ms      | 0.70      | 32       | 71.9%    | 25867    | 10829     | +0.049935 | 7.7%       |
+
+The real hit rate, 57 to 72%, is well below the simulated stub's 93 to 100%. Two different
+real models genuinely take different routes through the same task, so a predictor fit on
+`gemini-2.5-flash` traffic mispredicts `gemini-2.5-flash-lite`'s next call more often than
+the simulation's shared oracle logic ever would. Prefetch still pays at every latency
+tested here once the threshold is raised to 0.70, because a free tool means only wasted
+compute is at risk, never wasted spend; the simulated finding that speculation stops paying
+once the tool itself costs money is unchanged by this, since none of these real tool calls
+are billed.
+
+### Real cache study on the full 20-task suite, 2026-09-26
+
+The 14-task cache measurement above predates the six added tasks. Re-run on the current
+20-task suite, cheap tier, 900-second TTL:
+
+| layout      | cache | hit rate | caches created | cached tokens served | net saving | total spend |
+|-------------|-------|----------|----------------|-----------------------|------------|--------------|
+| cache_aware | on    | 98.9%    | 1              | 356,400               | +0.03106   | 0.01486      |
+| naive       | on    | 90.3%    | 9              | 340,704               | +0.02154   | 0.01792      |
+| cache_aware | off   | 0%       | 0              | 0                     | 0          | 0.03607      |
+
+Caching the stable prefix cuts real spend by 59%, from 0.03607 to 0.01486 USD. The naive
+layout still finds a real cache 90.3% of the time, for the same reason the simulated one
+does: the step counter it lets into the prefix recurs across tasks. It needs 9 caches
+instead of 1 and spends 21% more than the cache-aware layout for a lower hit rate, matching
+the simulated and first-real-run findings that a respectable hit rate is not the same claim
+as a net saving.

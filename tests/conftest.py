@@ -21,7 +21,7 @@ def runner(suite: Suite) -> CascadeRunner:
         suite,
         SimulatedFactory(seed=0),
         prefix_cache=PrefixCache(backend=LocalCacheBackend()),
-        verifier_factory=lambda tier: SimulatedVerifier(tier=tier, seed=0),
+        verifier_factory=lambda tier, run_id: SimulatedVerifier(tier=tier, seed=0),
     )
 
 

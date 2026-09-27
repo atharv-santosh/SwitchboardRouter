@@ -128,7 +128,7 @@ class BenchOptions:
     cache_backend: Any = None
     sleep: bool = False
     predictor: ToolPredictor | None = None
-    verifier_factory: Callable[[str], Any] | None = None
+    verifier_factory: Callable[[str, str], Any] | None = None
     factory: Any = None
 
 
@@ -136,7 +136,7 @@ def run_config(suite: Suite, config: RunConfig, options: BenchOptions) -> Config
     """Run every task in the suite once under one configuration."""
     factory = options.factory or SimulatedFactory(seed=options.seed, sleep=options.sleep)
     verifier_factory = options.verifier_factory or (
-        lambda tier_name: SimulatedVerifier(tier=tier_name, seed=options.seed)
+        lambda tier_name, run_id: SimulatedVerifier(tier=tier_name, seed=options.seed)
     )
     prefix_cache = PrefixCache(
         backend=options.cache_backend,

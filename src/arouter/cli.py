@@ -62,13 +62,17 @@ def _factory_and_cache(backend: str, fixtures: str | None, seed: int, sleep: boo
         return (
             SimulatedFactory(seed=seed, sleep=sleep),
             LocalCacheBackend(),
-            lambda tier_name: SimulatedVerifier(tier=tier_name, seed=seed),
+            lambda tier_name, run_id: SimulatedVerifier(tier=tier_name, seed=seed),
         )
     if backend == "vertex":
         from .models.vertex import VertexFactory
 
         vf = VertexFactory()
-        return vf, vf.cache_backend(), lambda tier_name: LiveVerifier(client=vf.make(tier_name), tier=tier_name)
+        return (
+            vf,
+            vf.cache_backend(),
+            lambda tier_name, run_id: LiveVerifier(client=vf.make(tier_name), tier=tier_name),
+        )
     if backend == "replay":
         if not fixtures:
             raise click.ClickException("--fixtures is required with --backend replay")
@@ -158,8 +162,8 @@ def bench(
                 continue
             factory = ReplayFactory(index=index)
             verifier_factory = (
-                lambda tier_name, _i=index, _c=config.name: ReplayVerifier(
-                    tier=tier_name, run_id=f"{_c}::", index=_i
+                lambda tier_name, run_id, _i=index: ReplayVerifier(
+                    tier=tier_name, run_id=run_id, index=_i
                 )
             )
         options = BenchOptions(
@@ -476,7 +480,7 @@ def budget_demo(suite_path: str | None, run_caps: str, tenant_cap_usd: float, ou
     config = RunConfig(name="tenant", tiers=LADDER[:1] + LADDER[-1:], policy="schema_validation")
     runner = CascadeRunner(
         suite, SimulatedFactory(seed=0), prefix_cache=PrefixCache(enabled=False), tenant_ledger=ledger,
-        verifier_factory=lambda t: SimulatedVerifier(tier=t),
+        verifier_factory=lambda t, run_id: SimulatedVerifier(tier=t),
     )
     tenant_rows = []
     for task in suite.tasks:

@@ -112,7 +112,7 @@ def test_runs_are_deterministic_for_a_fixed_seed(suite: Suite, cascade_config) -
             suite,
             SimulatedFactory(seed=7),
             prefix_cache=PrefixCache(backend=LocalCacheBackend()),
-            verifier_factory=lambda t: SimulatedVerifier(tier=t, seed=7),
+            verifier_factory=lambda t, run_id: SimulatedVerifier(tier=t, seed=7),
         )
         run = runner.run(suite.task("effective_footprint"), cascade_config, seed=7)
         return {"solved": run.solved, "usd": run.usd, "actions": [s.action for s in run.steps]}

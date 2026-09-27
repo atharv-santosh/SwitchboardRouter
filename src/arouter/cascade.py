@@ -204,7 +204,7 @@ class CascadeRunner:
         *,
         prefix_cache: PrefixCache | None = None,
         prefetcher: Prefetcher | None = None,
-        verifier_factory: Callable[[str], Any] | None = None,
+        verifier_factory: Callable[[str, str], Any] | None = None,
         tenant_ledger: Any = None,
     ) -> None:
         self.suite = suite
@@ -220,7 +220,7 @@ class CascadeRunner:
             self._clients[tier] = self.factory.make(tier)
         return self._clients[tier]
 
-    def _policy(self, config: RunConfig, task: Task) -> Policy:
+    def _policy(self, config: RunConfig, task: Task, run_id: str) -> Policy:
         name = config.policy
         if name == "always_cheap":
             return AlwaysCheap()
@@ -235,7 +235,7 @@ class CascadeRunner:
         if name == "verifier_model":
             if self.verifier_factory is None:
                 raise ValueError("verifier_model policy needs a verifier_factory")
-            return VerifierModel(verifier=self.verifier_factory(VERIFIER_TIER))
+            return VerifierModel(verifier=self.verifier_factory(VERIFIER_TIER, run_id))
         if name == "oracle":
             return OraclePolicy(gold_lookup=lambda obs: _gold_at(obs.task, obs.step))
         raise KeyError(f"unknown policy {name!r}")
@@ -248,7 +248,7 @@ class CascadeRunner:
         layout = make_layout(config.layout)
         ctx = build_context(self.suite, task, ws)
         policy: Policy = AlwaysStrong() if config.shadow else (
-            self._policy(config, task) if config.cascade else AlwaysCheap()
+            self._policy(config, task, run_id) if config.cascade else AlwaysCheap()
         )
         budget = BudgetEnforcer(run_cap_usd=config.run_cap_usd, ledger=self.tenant_ledger)
         spend = Spend()

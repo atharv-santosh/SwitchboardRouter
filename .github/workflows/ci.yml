@@ -1,0 +1,102 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: astral-sh/setup-uv@v4
+
+      - name: Install
+        run: |
+          uv venv .venv
+          source .venv/bin/activate
+          uv pip install -e ".[dev,gemini]"
+
+      - name: Type check
+        run: |
+          source .venv/bin/activate
+          mypy src/arouter
+
+      # No credentials are configured here on purpose. The live Vertex tests must skip
+      # cleanly and everything else must pass, which is the property that keeps this
+      # repository reproducible by someone who has no Google Cloud project.
+      - name: Tests, with no credentials present
+        run: |
+          source .venv/bin/activate
+          pytest -v
+
+      - name: Simulated frontier
+        run: |
+          source .venv/bin/activate
+          arouter shadow --out out/shadow --seeds 0,1,2
+          arouter fit out/shadow --out out/fit.json
+          arouter bench --learned-fit out/fit.json --out out/bench.json --html out/frontier.html
+
+      - name: Prompt cache study
+        run: |
+          source .venv/bin/activate
+          arouter cache-study --out out/cache-study.json
+
+      - name: Speculative prefetch study
+        run: |
+          source .venv/bin/activate
+          arouter prefetch-study --out out/prefetch-study.json --latencies 40,200 --thresholds 0.5,0.9
+
+      - name: Budget enforcement
+        run: |
+          source .venv/bin/activate
+          arouter budget-demo --out out/budget-demo.json
+
+      - name: Committed real-model fixtures still replay
+        run: |
+          source .venv/bin/activate
+          arouter verify fixtures/real
+          arouter bench --backend replay --fixtures fixtures/real/frontier \
+            --configs single_cheap --out out/replayed.json
+
+      - name: Assert the frontier did not silently collapse
+        run: |
+          source .venv/bin/activate
+          python - <<'PY'
+          import json, sys
+          report = json.load(open("out/bench.json"))
+          rows = {c["config"]["name"]: c for c in report["configs"]}
+          baseline = rows["single_strong"]
+          oracle = rows["cascade_oracle"]
+          problems = []
+          if not report["pareto_front"]:
+              problems.append("empty pareto front")
+          if baseline["success_rate"] < 0.6:
+              problems.append(f"baseline success collapsed to {baseline['success_rate']}")
+          if rows["single_cheap"]["success_rate"] >= baseline["success_rate"]:
+              problems.append("the cheap tier matched the strong one, so the suite separates nothing")
+          if rows["single_cheap"]["success_rate"] == 0:
+              problems.append("the cheap tier solved nothing, so escalation policies are indistinguishable")
+          if oracle["usd_per_solved_task"] >= baseline["usd_per_solved_task"]:
+              problems.append("routing has no headroom even with a perfect policy")
+          if problems:
+              print("\n".join(problems))
+              sys.exit(1)
+          print("frontier sane:", {k: (v["solved"], round(v["usd_per_solved_task"] or 0, 6)) for k, v in rows.items()})
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontier
+          path: |
+            out/frontier.html
+            out/bench.json
+            out/cache-study.json
+            out/prefetch-study.json
+            out/budget-demo.json

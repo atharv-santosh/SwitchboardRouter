@@ -1,0 +1,585 @@
+{
+  "backend": "vertex",
+  "baseline": "single_strong",
+  "configs": [
+    {
+      "cache": {
+        "cached_tokens_served": 733482,
+        "create_failures": 0,
+        "creates": 2,
+        "hit_rate": 0.989,
+        "hits": 180,
+        "last_create_error": null,
+        "lookups": 182,
+        "misses": 2,
+        "skipped_too_small": 0,
+        "storage_token_hours": 2038.5,
+        "uncached_prefix_tokens_paid": 7256,
+        "usd_net_saving": 0.2632445999999996,
+        "usd_saved_on_reads": 0.2652830999999996,
+        "usd_storage": 0.0020385
+      },
+      "calls": 182,
+      "config": {
+        "cache_enabled": true,
+        "confidence_threshold": 0.75,
+        "layout": "cache_aware",
+        "learned_threshold": 0.46,
+        "max_steps": 10,
+        "name": "cascade_self_confidence",
+        "policy": "self_confidence",
+        "prefetch_enabled": false,
+        "run_cap_usd": null,
+        "tiers": [
+          "cheap",
+          "strong"
+        ],
+        "tool_latency_ms": 0.0
+      },
+      "escalations": 84,
+      "mean_ms": 16583.8,
+      "n_tasks": 20,
+      "p50_ms": 15892.3,
+      "p95_ms": 32214.7,
+      "policy": {
+        "decisions": 98,
+        "escalation_rate": 0.8571,
+        "escalations": 84,
+        "latency_overhead_ms": 0.0,
+        "overhead_calls": 0,
+        "usd_overhead": 0.0
+      },
+      "prefetch": {
+        "considered": 0,
+        "coverage": 0.0,
+        "hit_rate": 0.0,
+        "hits": 0,
+        "launched": 0,
+        "misses": 0,
+        "ms_saved": 0.0,
+        "ms_wasted": 0.0,
+        "skipped_low_confidence": 0,
+        "skipped_no_prediction": 0,
+        "skipped_not_readonly": 0,
+        "usd_wasted": 0.0
+      },
+      "runs": [
+        {
+          "band": "easy",
+          "calls": 5,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 6314.2,
+          "degradations": [],
+          "escalations": 2,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "cascade_self_confidence::api_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "api_replicas",
+          "tokens_cached_in": 15792,
+          "tokens_in": 20636,
+          "tokens_out": 637,
+          "usd": 0.00511683,
+          "usd_by_tier": {
+            "cheap": 0.00029028,
+            "strong": 0.00482655
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 5,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 5830.7,
+          "degradations": [],
+          "escalations": 2,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "cascade_self_confidence::web_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "web_cpu",
+          "tokens_cached_in": 20358,
+          "tokens_in": 20666,
+          "tokens_out": 659,
+          "usd": 0.001981,
+          "usd_by_tier": {
+            "cheap": 0.0003004,
+            "strong": 0.0016806
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 5,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 6637.3,
+          "degradations": [],
+          "escalations": 2,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "cascade_self_confidence::named_service_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "named_service_memory",
+          "tokens_cached_in": 20358,
+          "tokens_in": 20701,
+          "tokens_out": 873,
+          "usd": 0.0024242499999999998,
+          "usd_by_tier": {
+            "cheap": 0.00034690000000000003,
+            "strong": 0.00207735
+          }
+        },
+        {
+          "band": "easy",
+          "calls": 5,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 6181.9,
+          "degradations": [],
+          "escalations": 2,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "cascade_self_confidence::policy_owner::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "policy_owner",
+          "tokens_cached_in": 20358,
+          "tokens_in": 20743,
+          "tokens_out": 915,
+          "usd": 0.00243835,
+          "usd_by_tier": {
+            "cheap": 0.0003685,
+            "strong": 0.00206985
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 9,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 12784.6,
+          "degradations": [],
+          "escalations": 4,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "cascade_self_confidence::no_op_trap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "no_op_trap",
+          "tokens_cached_in": 36666,
+          "tokens_in": 37798,
+          "tokens_out": 1666,
+          "usd": 0.00468665,
+          "usd_by_tier": {
+            "cheap": 0.0006766999999999999,
+            "strong": 0.00400995
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 5,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 5983.2,
+          "degradations": [],
+          "escalations": 2,
+          "failures": [],
+          "n_steps": 3,
+          "run_id": "cascade_self_confidence::decoy_web_replicas::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "decoy_web_replicas",
+          "tokens_cached_in": 20358,
+          "tokens_in": 20724,
+          "tokens_out": 756,
+          "usd": 0.00201235,
+          "usd_by_tier": {
+            "cheap": 0.00034600000000000006,
+            "strong": 0.00166635
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 7,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 11199.9,
+          "degradations": [],
+          "escalations": 3,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "cascade_self_confidence::replica_cap::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "replica_cap",
+          "tokens_cached_in": 28512,
+          "tokens_in": 29192,
+          "tokens_out": 1270,
+          "usd": 0.0036402500000000003,
+          "usd_by_tier": {
+            "cheap": 0.0004961,
+            "strong": 0.00314415
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 7,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 10449.3,
+          "degradations": [],
+          "escalations": 3,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "cascade_self_confidence::grep_then_edit::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "grep_then_edit",
+          "tokens_cached_in": 28512,
+          "tokens_in": 29142,
+          "tokens_out": 1383,
+          "usd": 0.0040091499999999995,
+          "usd_by_tier": {
+            "cheap": 0.0004975,
+            "strong": 0.00351165
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 7,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 9377.2,
+          "degradations": [],
+          "escalations": 3,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "cascade_self_confidence::two_edits_one_file::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_edits_one_file",
+          "tokens_cached_in": 28512,
+          "tokens_in": 29161,
+          "tokens_out": 1118,
+          "usd": 0.0036013999999999994,
+          "usd_by_tier": {
+            "cheap": 0.0004295,
+            "strong": 0.0031718999999999996
+          }
+        },
+        {
+          "band": "medium",
+          "calls": 7,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 10290.8,
+          "degradations": [],
+          "escalations": 3,
+          "failures": [],
+          "n_steps": 4,
+          "run_id": "cascade_self_confidence::cpu_consistency::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "cpu_consistency",
+          "tokens_cached_in": 28512,
+          "tokens_in": 29190,
+          "tokens_out": 1740,
+          "usd": 0.00464145,
+          "usd_by_tier": {
+            "cheap": 0.0005868,
+            "strong": 0.00405465
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 12,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 25489.0,
+          "degradations": [],
+          "escalations": 6,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "cascade_self_confidence::summary_schema::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "summary_schema",
+          "tokens_cached_in": 48924,
+          "tokens_in": 51180,
+          "tokens_out": 3705,
+          "usd": 0.012553850000000002,
+          "usd_by_tier": {
+            "cheap": 0.0008798,
+            "strong": 0.011674050000000002
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 9,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 18589.4,
+          "degradations": [],
+          "escalations": 4,
+          "failures": [
+            "services/worker.yaml:memory_mi is '1024', want '1080'"
+          ],
+          "n_steps": 5,
+          "run_id": "cascade_self_confidence::effective_footprint::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "effective_footprint",
+          "tokens_cached_in": 36666,
+          "tokens_in": 37996,
+          "tokens_out": 2447,
+          "usd": 0.0052335,
+          "usd_by_tier": {
+            "cheap": 0.0009813,
+            "strong": 0.004252199999999999
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 15,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 32214.7,
+          "degradations": [],
+          "escalations": 7,
+          "failures": [],
+          "n_steps": 8,
+          "run_id": "cascade_self_confidence::halve_large_memory::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "halve_large_memory",
+          "tokens_cached_in": 61128,
+          "tokens_in": 64145,
+          "tokens_out": 5038,
+          "usd": 0.014868699999999999,
+          "usd_by_tier": {
+            "cheap": 0.0014085999999999999,
+            "strong": 0.0134601
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 14,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 37010.5,
+          "degradations": [],
+          "escalations": 7,
+          "failures": [
+            "services/worker.yaml:memory_mi is '1024', want '1232'",
+            "summary keys [] != ['total_footprint_mi', 'worker_memory_mi', 'worker_replicas']",
+            "summary[worker_replicas] is None, want 10",
+            "summary[worker_memory_mi] is None, want 1232",
+            "summary[total_footprint_mi] is None, want 20000"
+          ],
+          "n_steps": 7,
+          "run_id": "cascade_self_confidence::cap_and_report::seed0",
+          "solved": false,
+          "stopped_by_budget": false,
+          "task_id": "cap_and_report",
+          "tokens_cached_in": 57078,
+          "tokens_in": 60698,
+          "tokens_out": 6436,
+          "usd": 0.017673,
+          "usd_by_tier": {
+            "cheap": 0.0017109,
+            "strong": 0.0159621
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 11,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 15892.3,
+          "degradations": [],
+          "escalations": 5,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "cascade_self_confidence::ignore_the_runbook::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "ignore_the_runbook",
+          "tokens_cached_in": 44820,
+          "tokens_in": 46423,
+          "tokens_out": 2247,
+          "usd": 0.006363349999999999,
+          "usd_by_tier": {
+            "cheap": 0.0008666,
+            "strong": 0.00549675
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 12,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 22067.1,
+          "degradations": [],
+          "escalations": 6,
+          "failures": [],
+          "n_steps": 6,
+          "run_id": "cascade_self_confidence::already_compliant::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "already_compliant",
+          "tokens_cached_in": 48924,
+          "tokens_in": 51470,
+          "tokens_out": 3574,
+          "usd": 0.0103467,
+          "usd_by_tier": {
+            "cheap": 0.0011139000000000001,
+            "strong": 0.0092328
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 10,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 24009.9,
+          "degradations": [],
+          "escalations": 5,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "cascade_self_confidence::order_dependent_edits::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "order_dependent_edits",
+          "tokens_cached_in": 40770,
+          "tokens_in": 42290,
+          "tokens_out": 3591,
+          "usd": 0.010972800000000003,
+          "usd_by_tier": {
+            "cheap": 0.0008613,
+            "strong": 0.010111500000000002
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 14,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 27416.6,
+          "degradations": [],
+          "escalations": 7,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "cascade_self_confidence::smallest_footprint_report::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "smallest_footprint_report",
+          "tokens_cached_in": 57078,
+          "tokens_in": 60348,
+          "tokens_out": 4419,
+          "usd": 0.014228399999999999,
+          "usd_by_tier": {
+            "cheap": 0.0011838,
+            "strong": 0.0130446
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 14,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 27724.3,
+          "degradations": [],
+          "escalations": 7,
+          "failures": [],
+          "n_steps": 7,
+          "run_id": "cascade_self_confidence::mean_footprint_cpu::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "mean_footprint_cpu",
+          "tokens_cached_in": 57078,
+          "tokens_in": 59848,
+          "tokens_out": 4522,
+          "usd": 0.013494299999999999,
+          "usd_by_tier": {
+            "cheap": 0.0012672,
+            "strong": 0.012227100000000001
+          }
+        },
+        {
+          "band": "hard",
+          "calls": 9,
+          "config": "cascade_self_confidence",
+          "critical_path_ms": 16212.8,
+          "degradations": [],
+          "escalations": 4,
+          "failures": [],
+          "n_steps": 5,
+          "run_id": "cascade_self_confidence::two_constraints::seed0",
+          "solved": true,
+          "stopped_by_budget": false,
+          "task_id": "two_constraints",
+          "tokens_cached_in": 36666,
+          "tokens_in": 38082,
+          "tokens_out": 2415,
+          "usd": 0.0065779,
+          "usd_by_tier": {
+            "cheap": 0.0008152000000000001,
+            "strong": 0.005762700000000001
+          }
+        }
+      ],
+      "solved": 18,
+      "solved_by_band": {
+        "easy": [
+          4,
+          4
+        ],
+        "hard": [
+          8,
+          10
+        ],
+        "medium": [
+          6,
+          6
+        ]
+      },
+      "success_rate": 0.9,
+      "tokens_cached_in": 737070,
+      "tokens_in": 770433,
+      "tokens_out": 49411,
+      "usd_by_tier": {
+        "cheap": 0.01542728,
+        "strong": 0.13143690000000002
+      },
+      "usd_per_solved_task": 0.008159121111111112,
+      "usd_per_task": 0.007343209000000001,
+      "usd_total": 0.14686418
+    }
+  ],
+  "notes": {
+    "cache_enabled": true,
+    "cache_ttl_seconds": 900,
+    "configs_completed": 1,
+    "configs_requested": 1,
+    "prefetch": false,
+    "seed": 0,
+    "tool_latency_ms": 0.0
+  },
+  "pareto_front": [
+    "cascade_self_confidence"
+  ],
+  "price_table_date": "2026-09-25",
+  "suite": "benchmarks/suite.yaml",
+  "tiers": {
+    "cheap": {
+      "model": "gemini-2.5-flash-lite",
+      "usd_per_mtok_cached_in": 0.01,
+      "usd_per_mtok_in": 0.1,
+      "usd_per_mtok_out": 0.4
+    },
+    "mid": {
+      "model": "gemini-2.5-flash",
+      "usd_per_mtok_cached_in": 0.03,
+      "usd_per_mtok_in": 0.3,
+      "usd_per_mtok_out": 2.5
+    },
+    "mid2": {
+      "model": "gemini-3.5-flash-lite",
+      "usd_per_mtok_cached_in": 0.03,
+      "usd_per_mtok_in": 0.3,
+      "usd_per_mtok_out": 2.5
+    },
+    "strong": {
+      "model": "gemini-3.6-flash",
+      "usd_per_mtok_cached_in": 0.075,
+      "usd_per_mtok_in": 0.75,
+      "usd_per_mtok_out": 3.75
+    }
+  },
+  "verifier_tier": "mid"
+}

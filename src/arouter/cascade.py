@@ -11,7 +11,7 @@ from .budget import BudgetEnforcer
 from .cache import PrefixCache
 from .context import Context, layout as make_layout
 from .events import Recorder
-from .models.base import ModelRequest, ModelResponse
+from .models.base import Action, ModelRequest, ModelResponse
 from .models.simulated import estimate_tokens
 from .policies import (
     AlwaysCheap,
@@ -28,7 +28,7 @@ from .policies import (
     features,
 )
 from .prefetch import Prefetcher
-from .pricing import LADDER, Spend, VERIFIER_TIER
+from .pricing import LADDER, Spend, Usage, VERIFIER_TIER
 from .suite import Grade, Suite, Task, grade
 from .tools import TOOL_SCHEMAS, ToolResult, Workspace, execute, render_workspace_listing
 
@@ -380,72 +380,24 @@ class CascadeRunner:
             action = response.action
             escalated = False
             if decision is not None and decision.escalate:
-                if not budget.allow_escalation:
-                    recorder.emit(
-                        "decision",
-                        {
-                            "kind": "escalation_suppressed",
-                            "detail": "budget degradation has disabled escalation; keeping the cheap action",
-                        },
-                    )
-                else:
-                    strong = config.strong_tier
-                    strong_request = ModelRequest(
-                        stable_prefix=prefix,
-                        volatile_suffix=suffix,
-                        tools=TOOL_SCHEMAS,
-                        meta={**request.meta, "attempt": 1},
-                    )
-                    strong_entry = self.prefix_cache.lookup_or_create(
-                        strong, prefix, TOOL_SCHEMAS, strong_request.prefix_hash, estimate_tokens(prefix)
-                    ) if config.cache_enabled else None
-                    if budget.can_afford(
-                        strong,
-                        prompt_tokens,
-                        strong_entry.tokens if strong_entry else 0,
-                        strong_request.max_output_tokens,
-                    ):
-                        recorder.emit(
-                            "llm_call",
-                            {
-                                "tier": strong,
-                                "request_hash": strong_request.request_hash,
-                                "prefix_hash": strong_request.prefix_hash,
-                                "prompt_tokens_est": prompt_tokens,
-                                "cache_handle": bool(strong_entry),
-                            },
-                        )
-                        strong_response = self._complete(strong, strong_request, strong_entry)
-                        spend.add(strong_response.usage)
-                        budget.charge(strong_response.usage)
-                        usages.append(strong_response.usage.to_dict())
-                        step_ms += strong_response.usage.latency_ms
-                        recorder.emit("llm_result", {"tier": strong, **strong_response.to_dict()})
-                        if config.shadow:
-                            recorder.emit(
-                                "decision",
-                                {
-                                    "kind": "shadow_label",
-                                    "features": features(obs),
-                                    "cheap_action": response.action.to_dict(),
-                                    "strong_action": strong_response.action.to_dict(),
-                                    "cheap_was_wrong": int(
-                                        not _actions_agree(response.action, strong_response.action)
-                                    ),
-                                },
-                            )
-                        action = strong_response.action
-                        tier_used = strong
-                        escalated = True
-                        escalations += 1
-                    else:
-                        recorder.emit(
-                            "decision",
-                            {
-                                "kind": "escalation_refused",
-                                "detail": "escalation would exceed the cap; keeping the cheap action",
-                            },
-                        )
+                escalation = self._escalate(
+                    config=config,
+                    recorder=recorder,
+                    budget=budget,
+                    spend=spend,
+                    request=request,
+                    prefix=prefix,
+                    suffix=suffix,
+                    prompt_tokens=prompt_tokens,
+                    cheap_response=response,
+                    obs=obs,
+                )
+                if escalation is not None:
+                    action, tier_used, usage = escalation
+                    usages.append(usage.to_dict())
+                    step_ms += usage.latency_ms
+                    escalated = True
+                    escalations += 1
 
             recorder.emit("tool_call", {"request": {"tool": action.tool, "args": action.args}})
             adopted = (
@@ -517,6 +469,84 @@ class CascadeRunner:
             stopped_by_budget=stopped_by_budget,
             events=[e.to_dict() for e in recorder.events],
         )
+
+    def _escalate(
+        self,
+        *,
+        config: RunConfig,
+        recorder: Recorder,
+        budget: BudgetEnforcer,
+        spend: Spend,
+        request: ModelRequest,
+        prefix: str,
+        suffix: str,
+        prompt_tokens: int,
+        cheap_response: ModelResponse,
+        obs: StepObservation,
+    ) -> tuple[Action, str, Usage] | None:
+        """Run the strong tier for this step, or explain in the trajectory why it did not."""
+        if not budget.allow_escalation:
+            recorder.emit(
+                "decision",
+                {
+                    "kind": "escalation_suppressed",
+                    "detail": "budget degradation has disabled escalation; keeping the cheap action",
+                },
+            )
+            return None
+
+        strong = config.strong_tier
+        strong_request = ModelRequest(
+            stable_prefix=prefix,
+            volatile_suffix=suffix,
+            tools=TOOL_SCHEMAS,
+            meta={**request.meta, "attempt": 1},
+        )
+        entry = (
+            self.prefix_cache.lookup_or_create(
+                strong, prefix, TOOL_SCHEMAS, strong_request.prefix_hash, estimate_tokens(prefix)
+            )
+            if config.cache_enabled
+            else None
+        )
+        if not budget.can_afford(
+            strong, prompt_tokens, entry.tokens if entry else 0, strong_request.max_output_tokens
+        ):
+            recorder.emit(
+                "decision",
+                {
+                    "kind": "escalation_refused",
+                    "detail": "escalation would exceed the cap; keeping the cheap action",
+                },
+            )
+            return None
+
+        recorder.emit(
+            "llm_call",
+            {
+                "tier": strong,
+                "request_hash": strong_request.request_hash,
+                "prefix_hash": strong_request.prefix_hash,
+                "prompt_tokens_est": prompt_tokens,
+                "cache_handle": bool(entry),
+            },
+        )
+        response = self._complete(strong, strong_request, entry)
+        spend.add(response.usage)
+        budget.charge(response.usage)
+        recorder.emit("llm_result", {"tier": strong, **response.to_dict()})
+        if config.shadow:
+            recorder.emit(
+                "decision",
+                {
+                    "kind": "shadow_label",
+                    "features": features(obs),
+                    "cheap_action": cheap_response.action.to_dict(),
+                    "strong_action": response.action.to_dict(),
+                    "cheap_was_wrong": int(not _actions_agree(cheap_response.action, response.action)),
+                },
+            )
+        return response.action, strong, response.usage
 
     def _complete(self, tier: str, request: ModelRequest, entry: Any) -> ModelResponse:
         client = self.client(tier)

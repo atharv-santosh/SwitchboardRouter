@@ -28,9 +28,18 @@ class FixtureIndex:
     run_ids: list[str] = field(default_factory=list)
 
     @classmethod
-    def load(cls, directory: str | Path) -> FixtureIndex:
+    def load(cls, directory: str | Path, config: str | None = None) -> FixtureIndex:
+        """Index recorded calls, optionally only those from one configuration.
+
+        Several configurations recorded into one directory share request hashes wherever
+        they sent the same prompt, so an unscoped index interleaves their responses and
+        replays none of them faithfully. Run ids carry the configuration name, so scoping
+        is exact rather than a guess about directory layout.
+        """
         index = cls()
         for run_id, events in iter_runs(directory):
+            if config is not None and not run_id.startswith(f"{config}::"):
+                continue
             index.run_ids.append(run_id)
             pending: tuple[str, str] | None = None
             for event in events:

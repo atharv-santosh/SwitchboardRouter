@@ -72,15 +72,11 @@ def _factory_and_cache(backend: str, fixtures: str | None, seed: int, sleep: boo
     if backend == "replay":
         if not fixtures:
             raise click.ClickException("--fixtures is required with --backend replay")
-        index = FixtureIndex.load(fixtures)
-        if not len(index):
+        # A real factory is built per configuration inside the bench loop; this only
+        # validates that the directory holds anything at all.
+        if not len(FixtureIndex.load(fixtures)):
             raise click.ClickException(f"no recorded llm calls under {fixtures}")
-        click.echo(f"loaded {len(index)} recorded calls from {len(index.run_ids)} runs", err=True)
-        return (
-            ReplayFactory(index=index),
-            None,
-            lambda tier_name: ReplayVerifier(tier=tier_name, run_id="", index=index),
-        )
+        return None, None, None
     raise click.ClickException(f"unknown backend {backend}")
 
 
@@ -154,6 +150,18 @@ def bench(
     results: list[ConfigResult] = []
     predictor: ToolPredictor | None = None
     for config in configs:
+        if backend == "replay":
+            assert fixtures is not None
+            index = FixtureIndex.load(fixtures, config=config.name)
+            if not len(index):
+                click.echo(f"{config.name:30} SKIPPED: no recorded calls for it under {fixtures}", err=True)
+                continue
+            factory = ReplayFactory(index=index)
+            verifier_factory = (
+                lambda tier_name, _i=index, _c=config.name: ReplayVerifier(
+                    tier=tier_name, run_id=f"{_c}::", index=_i
+                )
+            )
         options = BenchOptions(
             seed=seed,
             trajectory_dir=Path(trajectories) if trajectories else None,

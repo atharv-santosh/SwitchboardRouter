@@ -164,19 +164,32 @@ def render(report: dict[str, Any]) -> str:
 
     headline = ""
     if baseline and baseline["solved"]:
-        best = min(
-            (c for c in configs if c["solved"] and c["config"]["name"] != baseline_name),
-            key=lambda c: c["usd_per_solved_task"],
-            default=None,
+        lead = (
+            f"Baseline <code>{html.escape(baseline_name)}</code> solved "
+            f"{baseline['solved']}/{baseline['n_tasks']} at {_fmt_usd(baseline['usd_per_solved_task'])} "
+            f"per solved task, p50 {baseline['p50_ms']:.0f} ms and p95 {baseline['p95_ms']:.0f} ms. "
         )
-        if best:
-            headline = (
-                f"Baseline <code>{html.escape(baseline_name)}</code> solved "
-                f"{baseline['solved']}/{baseline['n_tasks']} at {_fmt_usd(baseline['usd_per_solved_task'])} "
-                f"per solved task. The cheapest configuration that solves anything is "
-                f"<code>{html.escape(best['config']['name'])}</code> at "
-                f"{_fmt_usd(best['usd_per_solved_task'])} per solved task, solving "
-                f"{best['solved']}/{best['n_tasks']}."
+        # The useful comparison is the cheapest configuration that gives up no success, not
+        # the cheapest one overall: the latter is always the weakest model on the chart.
+        matching = [
+            c
+            for c in configs
+            if c["config"]["name"] != baseline_name
+            and c["solved"]
+            and c["success_rate"] >= baseline["success_rate"]
+        ]
+        if matching:
+            best = min(matching, key=lambda c: c["usd_per_solved_task"])
+            headline = lead + (
+                f"<code>{html.escape(best['config']['name'])}</code> matched or beat that success rate "
+                f"at {_fmt_usd(best['usd_per_solved_task'])} per solved task, "
+                f"{best['usd_per_solved_task'] / baseline['usd_per_solved_task']:.2f}x the baseline, "
+                f"solving {best['solved']}/{best['n_tasks']}."
+            )
+        else:
+            headline = lead + (
+                "No other configuration matched that success rate, so every saving on this chart "
+                "was bought with tasks the baseline solved."
             )
 
     notes = report.get("notes", {})

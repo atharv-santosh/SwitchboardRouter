@@ -90,7 +90,7 @@ REAL_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "real" / "fro
 @pytest.mark.skipif(not REAL_FIXTURES.exists(), reason="committed real fixtures are absent")
 def test_the_committed_real_run_replays_to_its_published_numbers(suite: Suite) -> None:
     """The real-model rows in MEASUREMENTS.md must be reproducible with no credentials."""
-    index = FixtureIndex.load(REAL_FIXTURES)
+    index = FixtureIndex.load(REAL_FIXTURES, config="single_cheap")
     config = RunConfig(name="single_cheap", tiers=("cheap",), policy="none", max_steps=10)
     result = run_config(
         suite, config, BenchOptions(seed=0, cache_backend=LocalCacheBackend(), factory=ReplayFactory(index=index))
@@ -99,3 +99,24 @@ def test_the_committed_real_run_replays_to_its_published_numbers(suite: Suite) -
     assert result.n == 20
     assert result.usd_per_solved_task == pytest.approx(0.00099, abs=5e-6)
     assert result.cache.hit_rate > 0.95
+
+
+def test_an_unscoped_index_mixes_configurations(suite: Suite, tmp_path) -> None:
+    """Two configs that send the same prompt share request hashes, so scoping is required."""
+    for name, policy in (("rec_a", "schema_validation"), ("rec_b", "self_confidence")):
+        run_config(
+            suite,
+            RunConfig(name=name, tiers=LADDER[:1] + LADDER[-1:], policy=policy),
+            BenchOptions(seed=0, trajectory_dir=tmp_path, cache_backend=LocalCacheBackend(),
+                        factory=SimulatedFactory(seed=0)),
+        )
+    everything = FixtureIndex.load(tmp_path)
+    just_a = FixtureIndex.load(tmp_path, config="rec_a")
+    assert len(everything) > len(just_a)
+    assert all(r.startswith("rec_a::") for r in just_a.run_ids)
+    assert just_a.run_ids and len(just_a.run_ids) == len(suite.tasks)
+
+
+def test_scoping_to_an_absent_config_gives_an_empty_index(suite: Suite, tmp_path) -> None:
+    _record(suite, tmp_path)
+    assert len(FixtureIndex.load(tmp_path, config="never_ran")) == 0

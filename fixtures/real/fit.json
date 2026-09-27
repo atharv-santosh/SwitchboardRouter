@@ -1,0 +1,43 @@
+{
+  "base_rate_cheap_wrong": 0.3619,
+  "holdout": {
+    "accuracy": 0.7576,
+    "auc": 0.79,
+    "false_escalation_rate": 0.12,
+    "fn": 5,
+    "fp": 3,
+    "n": 33,
+    "precision": 0.5,
+    "recall_on_wrong": 0.375,
+    "tn": 22,
+    "tp": 3,
+    "youden_j": 0.255
+  },
+  "n_holdout": 33,
+  "n_train": 72,
+  "threshold": 0.46,
+  "train": {
+    "accuracy": 0.75,
+    "auc": 0.7897,
+    "false_escalation_rate": 0.1667,
+    "fn": 11,
+    "fp": 7,
+    "n": 72,
+    "precision": 0.7308,
+    "recall_on_wrong": 0.6333,
+    "tn": 35,
+    "tp": 19,
+    "youden_j": 0.4667
+  },
+  "weights": {
+    "bias": 0.01284,
+    "confidence": -1.64646,
+    "empty_summary_when_required": 1.21528,
+    "is_finish": 2.86401,
+    "is_write": 0.82927,
+    "n_prior_writes": -0.56777,
+    "prompt_ktokens": 0.02722,
+    "schema_invalid": 1.21528,
+    "step_frac": -2.70458
+  }
+}

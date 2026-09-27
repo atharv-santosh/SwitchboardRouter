@@ -63,7 +63,8 @@ jobs:
           source .venv/bin/activate
           arouter verify fixtures/real
           arouter bench --backend replay --fixtures fixtures/real/frontier \
-            --configs single_cheap --out out/replayed.json
+            --learned-fit fixtures/real/fit.json --out out/real-replayed.json \
+            --html out/real-frontier.html
 
       - name: Assert the frontier did not silently collapse
         run: |
@@ -100,3 +101,5 @@ jobs:
             out/cache-study.json
             out/prefetch-study.json
             out/budget-demo.json
+            out/real-frontier.html
+            out/real-replayed.json

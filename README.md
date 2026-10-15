@@ -1,4 +1,4 @@
-# agent-router
+# Switchboard Router
 
 Cost aware execution for agents, measured in dollars per solved task rather than
 tokens saved.
